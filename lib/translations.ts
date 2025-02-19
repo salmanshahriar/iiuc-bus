@@ -1,0 +1,48 @@
+export const translations = {
+  en: {
+    profile: "Profile",
+    email: "Email",
+    language: "Language",
+    busType: "Bus Type",
+    male: "Male",
+    female: "Female",
+    teacher: "Teacher",
+    administrative: "Administrative",
+    staff: "Staff",
+    logout: "Logout",
+    home: "Home",
+    nearestBuses: "Nearby Bus",
+    schedule: "Schedule",
+    lostAndFound: "Lost/Found",
+    support: "Support",
+    activeBuses: "Active Buses",
+    trackBusesRealTime: "Track buses in real time",
+    onRoad: "on road",
+    active: "active",
+  },
+  bn: {
+    profile: "প্রোফাইল",
+    email: "ইমেইল",
+    language: "ভাষা",
+    busType: "বাস টাইপ",
+    male: "পুরুষ",
+    female: "মহিলা",
+    teacher: "শিক্ষক",
+    administrative: "প্রশাসনিক",
+    staff: "কর্মী",
+    logout: "লগআউট",
+    home: "হোম",
+    nearestBuses: "কাছের বাস",
+    schedule: "সময়সূচী",
+    lostAndFound: "হারানো/পাওয়া",
+    support: "সহায়তা",
+    activeBuses: "সক্রিয় বাস",
+    trackBusesRealTime: "রিয়েল টাইমে বাস ট্র্যাক করুন",
+    onRoad: "রাস্তায়",
+    active: "সক্রিয়",
+  },
+}
+
+export type Language = keyof typeof translations
+export type TranslationKey = keyof typeof translations.en
+
