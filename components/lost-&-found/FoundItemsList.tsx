@@ -35,7 +35,7 @@ const FOUND_ITEMS = [
 
 export function FoundItemsList() {
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 mb-20 md:mb-0">
       {FOUND_ITEMS.map((item, index) => (
         <motion.div
           key={item.id}

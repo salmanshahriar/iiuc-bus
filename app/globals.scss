@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+html {
+  background-color: #47fda8;
+}
+
 :root {
   --primary-color: #47fda8; /* Lime Green */
   --secondary-color: #30ff9e; /* Deeper Lime */
@@ -37,6 +41,7 @@
     --install-navbar-height: 48px;
     --header-height: 4rem;
     --bottom-nav-height: 4rem;
+    --theme-color: #47fda8;
   }
 
   .dark {

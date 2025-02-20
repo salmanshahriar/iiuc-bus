@@ -31,7 +31,7 @@ export default function SchedulePage({ from, to, date }: SchedulePageProps) {
   }, [fetchLiveBusSchedules, from, to, date])
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] p-4 pt-0 md:p-8 glow-background">
+    <div className="min-h-[calc(100vh-4rem)] p-4 pt-0 md:p-8 mb-20 md:mb-0 glow-background">
       <div className="m-0 md:mb-6 hidden md:block">
         <div className="flex items-center gap-2 mb-2">
           <Clock className="h-6 w-6 text-[var(--primary-color)]" />

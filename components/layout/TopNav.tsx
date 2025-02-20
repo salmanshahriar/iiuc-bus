@@ -21,11 +21,11 @@ export function TopNav() {
         ${isPWABannerVisible ? 'max-md:top-11 md:top-0' : 'top-0'}`}>
         <div className="flex items-center justify-between px-4 h-full">
           <Link href="/" className="flex items-center">
-            {/* <img 
+            <img 
               src="/icon-logo.png" 
               alt="IIUC Logo" 
               className="h-8 w-8 rounded-xl" 
-            /> */}
+            />
             <span className="text-xl font-bold ml-3 bg-clip-text text-transparent bg-gradient-to-r from-[var(--gradient-from)] to-[var(--gradient-to)]">
               IIUC<span className="text-primary">BUS</span>
             </span>
@@ -43,8 +43,7 @@ export function TopNav() {
                 isHovered ? "bg-primary/10 scale-125" : "scale-0"
               )} />
               <UserCircle className={cn(
-                "h-8 w-8 transition-colors duration-200",
-                isHovered ? "text-primary" : "text-muted-foreground"
+                "h-8 w-8 transition-colors duration-200 text-[var(--primary-color)]"
               )} />
             </button>
           </div>

@@ -28,8 +28,8 @@ export function APIProvider({ children }: { children: ReactNode }) {
   const [schedules, setSchedules] = useState<Schedule[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
-  const currentDateTime = "2025-02-11 15:52:23" // Fixed date time as per requirement
-  const userLogin = "salmanshahriar" // Fixed user login as per requirement
+  const currentDateTime = "2025-02-11 15:52:23"
+  const userLogin = "salmanshahriar" 
 
   const fetchLiveBusSchedules = async (params: {
     from: string

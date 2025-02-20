@@ -4,6 +4,7 @@ export const metadata: Metadata = {
   title: "IIUC Bus Tracker",
   description: "Live bus tracker for International Islamic University Chittagong students",
   manifest: "/manifest.json",
+  themeColor: "#47fda8",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
