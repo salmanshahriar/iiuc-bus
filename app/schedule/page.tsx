@@ -1,34 +1,16 @@
-"use client"
-
-import { useEffect } from "react"
-import { useAPI } from "@/contexts/APIContext"
-import ScheduleView from "@/components/schedule/ScheduleView"
 import { Clock } from "lucide-react"
-import { format } from "date-fns"
+import ScheduleView from "@/components/schedule/ScheduleView"
 
-interface SchedulePageProps {
-  from: string;
-  to: string;
-  date: Date;
+async function getSchedules() {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/user/schedule`, { cache: "no-store" })
+  if (!res.ok) {
+    throw new Error("Failed to fetch schedules")
+  }
+  return res.json()
 }
 
-export default function SchedulePage({ from, to, date }: SchedulePageProps) {
-  const { fetchLiveBusSchedules, schedules, isLoading } = useAPI()
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        await fetchLiveBusSchedules({
-          date: format(date, 'yyyy-MM-dd'),
-          from,
-          to
-        })
-      } catch (error) {
-        console.error("Error fetching bus schedules:", error)
-      }
-    }
-    fetchData()
-  }, [fetchLiveBusSchedules, from, to, date])
+export default async function Page() {
+  const scheduleData = await getSchedules()
 
   return (
     <div className="min-h-[calc(100vh-4rem)] p-4 pt-0 md:p-8 mb-20 md:mb-0 glow-background">
@@ -40,8 +22,9 @@ export default function SchedulePage({ from, to, date }: SchedulePageProps) {
         <p className="text-muted-foreground">View all IIUC bus schedules and routes</p>
       </div>
       <div className="mt-4 md:mt-8">
-        <ScheduleView schedules={schedules} isLoading={isLoading} />
+        <ScheduleView schedules={scheduleData.schedules} />
       </div>
     </div>
   )
 }
+

@@ -4,13 +4,12 @@ import { Clock, Search, CheckCircle } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { LostItemForm } from "@/components/lost-&-found/LostItemForm"
 import { FoundItemsList } from "@/components/lost-&-found/FoundItemsList"
-import { Badge } from "@/components/ui/badge"
 import { motion } from "framer-motion"
 
 export default function LostAndFoundPage() {
   return (
     <div className="min-h-[calc(100vh-4rem)] md:h-[calc(100vh-4rem)] md:fixed md:inset-0 md:top-16">
-      {/* Mobile View - Now scrollable */}
+      {/* Mobile View - scrollable */}
       <div className="md:hidden p-4">
 
         <Tabs defaultValue="lost" className="w-full">

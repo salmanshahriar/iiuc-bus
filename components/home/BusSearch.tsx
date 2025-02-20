@@ -4,25 +4,13 @@ import { useState } from "react"
 import { format } from "date-fns"
 import { Search, MapPin, School, AlertCircle, Clock, User, Navigation } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
-import { useAPI } from "@/contexts/APIContext"
 import { Button } from "@/components/ui/button"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import { DatePicker } from "../ui/date-picker"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { DatePicker } from "@/components/ui/date-picker"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 interface BusSearchProps {
-  onSearch: () => void
+  onSearch: (params: { from: string; to: string; date: string }) => Promise<void>
   currentDateTime: string
   userLogin: string
 }
@@ -34,10 +22,10 @@ const LOCATIONS = [
   { value: "2 No. Gate", label: "2 No. Gate", isUniversity: false },
   { value: "Muradpur", label: "Muradpur", isUniversity: false },
   { value: "AK Khan", label: "AK Khan", isUniversity: false },
+  { value: "BOT", label: "BOT", isUniversity: false },
 ] as const
 
 export function BusSearch({ onSearch, currentDateTime, userLogin }: BusSearchProps) {
-  const { fetchLiveBusSchedules } = useAPI()
   const [from, setFrom] = useState("")
   const [to, setTo] = useState("")
   const [date, setDate] = useState<Date>(() => {
@@ -47,15 +35,14 @@ export function BusSearch({ onSearch, currentDateTime, userLogin }: BusSearchPro
   })
   const [isSearching, setIsSearching] = useState(false)
   const [validationError, setValidationError] = useState<string | null>(null)
+  const [searchError, setSearchError] = useState<string | null>(null)
 
-  // Validation logic remains the same
+  // Validation logic
   const validateSelection = (fromVal: string, toVal: string) => {
     if (!fromVal || !toVal) return null
     if (fromVal === toVal) return "Cannot select the same location"
-    if (fromVal === "University" && toVal === "University") 
-      return "Cannot select University for both locations"
-    if (fromVal !== "University" && toVal !== "University") 
-      return "One location must be University"
+    if (fromVal === "University" && toVal === "University") return "Cannot select University for both locations"
+    if (fromVal !== "University" && toVal !== "University") return "One location must be University"
     return null
   }
 
@@ -73,7 +60,7 @@ export function BusSearch({ onSearch, currentDateTime, userLogin }: BusSearchPro
 
   const handleSearch = async () => {
     if (!from || !to || !date) return
-    
+
     const error = validateSelection(from, to)
     if (error) {
       setValidationError(error)
@@ -81,15 +68,16 @@ export function BusSearch({ onSearch, currentDateTime, userLogin }: BusSearchPro
     }
 
     setIsSearching(true)
+    setSearchError(null)
     try {
-      await fetchLiveBusSchedules({
+      await onSearch({
         from,
         to,
-        date: format(date, 'yyyy-MM-dd')
+        date: format(date, "yyyy-MM-dd"),
       })
-      onSearch()
     } catch (error) {
       console.error("Search failed:", error)
+      setSearchError("Failed to fetch bus schedules. Please try again.")
     } finally {
       setIsSearching(false)
     }
@@ -103,11 +91,7 @@ export function BusSearch({ onSearch, currentDateTime, userLogin }: BusSearchPro
     })
 
     return sortedLocations.map((location) => (
-      <SelectItem 
-        key={location.value} 
-        value={location.value}
-        className="group"
-      >
+      <SelectItem key={location.value} value={location.value} className="group">
         <div className="flex items-center gap-2">
           <div className="relative">
             {location.isUniversity ? (
@@ -116,8 +100,10 @@ export function BusSearch({ onSearch, currentDateTime, userLogin }: BusSearchPro
               <MapPin className="h-4 w-4 text-muted-foreground group-hover:scale-110 transition-transform duration-200" />
             )}
           </div>
-          <span className={`${location.isUniversity ? 'text-primary font-medium' : ''} 
-            group-hover:text-primary transition-colors duration-200`}>
+          <span
+            className={`${location.isUniversity ? "text-primary font-medium" : ""} 
+            group-hover:text-primary transition-colors duration-200`}
+          >
             {location.label}
           </span>
         </div>
@@ -126,12 +112,13 @@ export function BusSearch({ onSearch, currentDateTime, userLogin }: BusSearchPro
   }
 
   return (
-    <div className="relative space-y-4 p-3 sm:p-6 md:p-8 
+    <div
+      className="relative space-y-4 p-3 sm:p-6 md:p-8 
       bg-background/60 backdrop-blur-2xl rounded-xl sm:rounded-2xl border border-border/50 
       shadow-[0_8px_32px_-8px_rgba(0,0,0,0.12)] 
       hover:shadow-[0_16px_48px_-12px_rgba(0,0,0,0.15)]
-      transition-all duration-500 ease-out">
-      
+      transition-all duration-500 ease-out"
+    >
       <div className="grid gap-3 sm:gap-5">
         {/* Route Selection */}
         <div className="grid gap-2 sm:gap-4 sm:grid-cols-2">
@@ -142,16 +129,20 @@ export function BusSearch({ onSearch, currentDateTime, userLogin }: BusSearchPro
               From
             </label>
             <Select value={from} onValueChange={handleFromChange}>
-              <SelectTrigger className="h-10 sm:h-12 bg-background/60 backdrop-blur-sm rounded-lg sm:rounded-xl 
+              <SelectTrigger
+                className="h-10 sm:h-12 bg-background/60 backdrop-blur-sm rounded-lg sm:rounded-xl 
                 border-border/50 text-sm
                 shadow-[0_4px_16px_-4px_rgba(0,0,0,0.08)] 
                 group-hover:shadow-[0_4px_20px_-4px_rgba(242,78,30,0.15)]
-                transition-all duration-300">
+                transition-all duration-300"
+              >
                 <SelectValue placeholder="Select departure" />
               </SelectTrigger>
-              <SelectContent className="rounded-lg sm:rounded-xl border-border/50 
+              <SelectContent
+                className="rounded-lg sm:rounded-xl border-border/50 
                 shadow-[0_16px_48px_-12px_rgba(0,0,0,0.15)]
-                max-h-[240px] overflow-y-auto">
+                max-h-[240px] overflow-y-auto"
+              >
                 {renderLocationItems()}
               </SelectContent>
             </Select>
@@ -164,16 +155,20 @@ export function BusSearch({ onSearch, currentDateTime, userLogin }: BusSearchPro
               To
             </label>
             <Select value={to} onValueChange={handleToChange}>
-              <SelectTrigger className="h-10 sm:h-12 bg-background/60 backdrop-blur-sm rounded-lg sm:rounded-xl 
+              <SelectTrigger
+                className="h-10 sm:h-12 bg-background/60 backdrop-blur-sm rounded-lg sm:rounded-xl 
                 border-border/50 text-sm
                 shadow-[0_4px_16px_-4px_rgba(0,0,0,0.08)]
                 group-hover:shadow-[0_4px_20px_-4px_rgba(242,78,30,0.15)]
-                transition-all duration-300">
+                transition-all duration-300"
+              >
                 <SelectValue placeholder="Select destination" />
               </SelectTrigger>
-              <SelectContent className="rounded-lg sm:rounded-xl border-border/50 
+              <SelectContent
+                className="rounded-lg sm:rounded-xl border-border/50 
                 shadow-[0_16px_48px_-12px_rgba(0,0,0,0.15)]
-                max-h-[240px] overflow-y-auto">
+                max-h-[240px] overflow-y-auto"
+              >
                 {renderLocationItems()}
               </SelectContent>
             </Select>
@@ -182,16 +177,17 @@ export function BusSearch({ onSearch, currentDateTime, userLogin }: BusSearchPro
 
         {/* Validation Error Message */}
         <AnimatePresence>
-          {validationError && (
+          {(validationError || searchError) && (
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.2 }}
               className="flex items-center gap-2 text-xs sm:text-sm text-destructive p-2 sm:p-4 rounded-lg sm:rounded-xl 
-                bg-destructive/8 border border-destructive/15">
+                bg-destructive/8 border border-destructive/15"
+            >
               <AlertCircle className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
-              <span className="leading-tight">{validationError}</span>
+              <span className="leading-tight">{validationError || searchError}</span>
             </motion.div>
           )}
         </AnimatePresence>
@@ -223,7 +219,7 @@ export function BusSearch({ onSearch, currentDateTime, userLogin }: BusSearchPro
         <Tooltip>
           <TooltipTrigger asChild>
             <div>
-              <Button 
+              <Button
                 className="w-full h-10 sm:h-12 rounded-lg sm:rounded-xl bg-gradient-to-r from-[var(--gradient-from)] to-[var(--gradient-to)] 
                   hover:from-[var(--gradient-from)]/50 hover:to-[--gradient-to)]/50 hover:opacity-90
                   shadow-[0_4px_20px_-4px_rgba(242,78,30,0.3)]
@@ -233,9 +229,11 @@ export function BusSearch({ onSearch, currentDateTime, userLogin }: BusSearchPro
                 onClick={handleSearch}
                 disabled={isSearching || !from || !to || !!validationError}
               >
-                <div className="absolute inset-0 rounded-lg sm:rounded-xl bg-gradient-to-r from-white/0 via-white/20 to-white/0 
-                  opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                
+                <div
+                  className="absolute inset-0 rounded-lg sm:rounded-xl bg-gradient-to-r from-white/0 via-white/20 to-white/0 
+                  opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                />
+
                 {isSearching ? (
                   <div className="flex items-center gap-2">
                     <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
@@ -250,7 +248,7 @@ export function BusSearch({ onSearch, currentDateTime, userLogin }: BusSearchPro
               </Button>
             </div>
           </TooltipTrigger>
-          <TooltipContent 
+          <TooltipContent
             side="bottom"
             className="bg-background/80 backdrop-blur-lg border-border/50 text-xs sm:text-sm"
           >
@@ -266,11 +264,13 @@ export function BusSearch({ onSearch, currentDateTime, userLogin }: BusSearchPro
       </TooltipProvider>
 
       {/* Status Footer */}
-      <div className="pt-2 sm:pt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2 
-        text-[10px] sm:text-xs text-muted-foreground/60 border-t border-border/40">
+      <div
+        className="pt-2 sm:pt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2 
+        text-[10px] sm:text-xs text-muted-foreground/60 border-t border-border/40"
+      >
         <div className="flex items-center gap-1.5">
           <Clock className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-          <span>Updated: {format(new Date("2025-02-09 13:35:08"), "HH:mm:ss")}</span>
+          <span>Updated: {format(new Date(currentDateTime), "HH:mm:ss")}</span>
         </div>
         <div className="flex items-center gap-1.5">
           <User className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
@@ -280,3 +280,4 @@ export function BusSearch({ onSearch, currentDateTime, userLogin }: BusSearchPro
     </div>
   )
 }
+
