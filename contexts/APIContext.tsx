@@ -13,7 +13,6 @@ interface APIContextType {
   isLoading: boolean
   errorMessage: string | null
   currentDateTime: string
-  userLogin: string
   fetchLiveBusSchedules: (params: {
     from: string
     to: string
@@ -28,8 +27,6 @@ export function APIProvider({ children }: { children: ReactNode }) {
   const [schedules, setSchedules] = useState<Schedule[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
-  const currentDateTime = "2025-02-11 15:52:23"
-  const userLogin = "salmanshahriar" 
 
   const fetchLiveBusSchedules = async (params: {
     from: string
@@ -40,10 +37,9 @@ export function APIProvider({ children }: { children: ReactNode }) {
     setErrorMessage(null)
     try {
       const response = await fetch(`${API_BASE_URL}/api/user/find-LiveSchedule?date=${params.date}&from=${params.from}&to=${params.to}`, {
+        method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          'User-Login': userLogin,
-          'Current-Time': currentDateTime
         }
       })
 
@@ -72,8 +68,6 @@ export function APIProvider({ children }: { children: ReactNode }) {
       const response = await fetch(`${API_BASE_URL}/api/user/schedule`, {
         headers: {
           'Content-Type': 'application/json',
-          'User-Login': userLogin,
-          'Current-Time': currentDateTime
         }
       })
       const data = await response.json()
