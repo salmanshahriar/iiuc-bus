@@ -1,149 +1,210 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
-import { MapContainer, TileLayer, Marker, Popup, ZoomControl } from "react-leaflet"
+import type React from "react"
+
+import { useEffect, useRef, useMemo, useCallback, useState } from "react"
 import L from "leaflet"
 import "leaflet/dist/leaflet.css"
 import type { Bus } from "@/types/bus"
+import { Button } from "@/components/ui/button"
+import { Plus, Minus, Locate } from "lucide-react"
 
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-} from "@/components/ui/select"
-import { usePWA } from "@/contexts/PWAContext"
+interface UserLocation {
+  lat: number
+  lng: number
+}
 
 interface MapProps {
   buses: Bus[]
   selectedBus: Bus | null
-  userLocation: { lat: number; lng: number } | null
+  userLocation: UserLocation
+  onBusSelect: (bus: Bus | null) => void
+  trackSelectedBus: boolean
+  setTrackSelectedBus: (track: boolean) => void
 }
 
-const busIcon = new L.Icon({
-  iconUrl: "/bus-marker.png",
-  iconSize: [32, 32],
-  iconAnchor: [16, 32],
-  popupAnchor: [0, -32],
-})
-
-export default function Map({ buses, selectedBus, userLocation }: MapProps) {
-  const mapRef = useRef<L.Map | null>(null)
-  const [currentLayer, setCurrentLayer] = useState<keyof typeof mapLayers>("detailed")
-  const defaultCenter: [number, number] = [22.3569, 91.7832]
+const Map = ({ buses, selectedBus, userLocation, onBusSelect, trackSelectedBus, setTrackSelectedBus }: MapProps) => {
   const [map, setMap] = useState<L.Map | null>(null)
-  const { isPWABannerVisible } = usePWA()
+  const mapContainerRef = useRef<HTMLDivElement>(null)
+  const busMarkersRef = useRef<{ [key: string]: L.Marker }>({})
+  const userMarkerRef = useRef<L.Marker | null>(null)
 
-  useEffect(() => {
-    if (map && selectedBus?.location) {
-      map.setView(
-        [selectedBus.location.lat, selectedBus.location.lng],
-        16,
-        { animate: true }
-      )
+  const memoizedBuses = useMemo(() => buses, [buses])
+
+  const createCustomIcon = useCallback((iconName: string, color: string, isSelected: boolean) => {
+    const size = isSelected ? 36 : 24
+    return L.divIcon({
+      className: "custom-icon",
+      html: `<div style="background-color: ${isSelected ? "#ffffff" : "transparent"}; border-radius: 50%; padding: 2px;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="${isSelected ? color : "none"}" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          ${iconName === "bus" ? '<path d="M8 6v6"/><path d="M15 6v6"/><path d="M2 12h19.6"/><path d="M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3"/><circle cx="7" cy="18" r="2"/><circle cx="15" cy="18" r="2"/>' : '<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>'}
+        </svg>
+      </div>`,
+      iconSize: [size, size],
+      iconAnchor: [size / 2, size],
+    })
+  }, [])
+
+  const MapButton = ({ onClick, children }: { onClick: () => void; children: React.ReactNode }) => (
+    <Button
+      variant="secondary"
+      size="sm"
+      className="bg-background/95 backdrop-blur-sm shadow-lg rounded-xl 
+        hover:shadow-xl transition-all duration-200 
+        border border-primary/20 hover:border-primary/40
+        flex items-center justify-center w-10 h-10"
+      onClick={onClick}
+    >
+      {children}
+    </Button>
+  )
+
+  const handleZoomIn = useCallback(() => {
+    map?.zoomIn()
+  }, [map])
+
+  const handleZoomOut = useCallback(() => {
+    map?.zoomOut()
+  }, [map])
+
+  const handleLocate = useCallback(() => {
+    if (map) {
+      map.setView([userLocation.lat, userLocation.lng], 15)
+      setTrackSelectedBus(false)
+      onBusSelect(null)
     }
-  }, [selectedBus, map])
+  }, [map, userLocation, setTrackSelectedBus, onBusSelect])
+
+  // Initialize map
+  useEffect(() => {
+    if (!mapContainerRef.current || map) return
+
+    const initMap = () => {
+      if (!mapContainerRef.current) return
+
+      const newMap = L.map(mapContainerRef.current, {
+        center: [userLocation.lat, userLocation.lng],
+        zoom: 13,
+        zoomControl: false,
+      })
+
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      }).addTo(newMap)
+
+      setMap(newMap)
+    }
+
+    // Delay map initialization to ensure the container is in the DOM
+    setTimeout(initMap, 100)
+
+    return () => {
+      if (map) {
+        map.remove()
+      }
+    }
+  }, [userLocation, map])
+
+  // Handle map click and user marker
+  useEffect(() => {
+    if (!map) return
+
+    const handleMapClick = (e: L.LeafletMouseEvent) => {
+      if (!(e.originalEvent.target instanceof Element) || !e.originalEvent.target.closest(".custom-icon")) {
+        setTrackSelectedBus(false)
+        onBusSelect(null)
+      }
+    }
+
+    map.on("click", handleMapClick)
+
+    const userIcon = createCustomIcon("map-pin", "#0000FF", false)
+    userMarkerRef.current = L.marker([userLocation.lat, userLocation.lng], { icon: userIcon })
+      .addTo(map)
+      .bindPopup("Your Location")
+
+    return () => {
+      map.off("click", handleMapClick)
+      if (userMarkerRef.current) {
+        userMarkerRef.current.remove()
+      }
+    }
+  }, [map, userLocation, createCustomIcon, setTrackSelectedBus, onBusSelect])
+
+  // Update bus markers
+  useEffect(() => {
+    if (!map) return
+
+    memoizedBuses.forEach((bus) => {
+      const lat = Number.parseFloat(bus.latitude)
+      const lng = Number.parseFloat(bus.longitude)
+      if (isNaN(lat) || isNaN(lng)) return
+
+      const isSelected = selectedBus?.vehicleID === bus.vehicleID
+      const busIcon = createCustomIcon("bus", isSelected ? "#00FF00" : "#FF0000", isSelected)
+
+      if (busMarkersRef.current[bus.vehicleID]) {
+        busMarkersRef.current[bus.vehicleID].setLatLng([lat, lng]).setIcon(busIcon)
+      } else {
+        const marker = L.marker([lat, lng], { icon: busIcon })
+          .addTo(map)
+          .bindPopup(`Bus ID: ${bus.vehicleID}<br>Speed: ${bus.speed} km/h`)
+
+        marker.on("click", () => {
+          onBusSelect(bus)
+          setTrackSelectedBus(true)
+        })
+
+        busMarkersRef.current[bus.vehicleID] = marker
+      }
+    })
+
+    // Remove markers for buses that are no longer in the list
+    Object.keys(busMarkersRef.current).forEach((busId) => {
+      if (!memoizedBuses.some((bus) => bus.vehicleID === busId)) {
+        busMarkersRef.current[busId].remove()
+        delete busMarkersRef.current[busId]
+      }
+    })
+  }, [map, memoizedBuses, selectedBus, createCustomIcon, onBusSelect, setTrackSelectedBus])
+
+  // Handle tracking
+  useEffect(() => {
+    if (!map || !selectedBus || !trackSelectedBus) return
+
+    const lat = Number.parseFloat(selectedBus.latitude)
+    const lng = Number.parseFloat(selectedBus.longitude)
+    if (isNaN(lat) || isNaN(lng)) return
+
+    map.setView([lat, lng], map.getZoom(), { animate: true, duration: 1 })
+
+    const updateInterval = setInterval(() => {
+      const marker = busMarkersRef.current[selectedBus.vehicleID]
+      if (marker) {
+        map.setView(marker.getLatLng(), map.getZoom(), { animate: true, duration: 1 })
+      }
+    }, 1000)
+
+    return () => clearInterval(updateInterval)
+  }, [map, selectedBus, trackSelectedBus])
 
   return (
-    <>
-      <style jsx global>{`
-        .leaflet-control-zoom {
-          border: none !important;
-          margin-top: 16px !important;
-          margin-right: 16px !important;
-        }
-        
-        .leaflet-control-zoom-in,
-        .leaflet-control-zoom-out {
-          width: 36px !important;
-          height: 36px !important;
-          line-height: 36px !important;
-          background-color: hsl(var(--background)) !important;
-          border: 1px solid rgba(255, 122, 92, 0.2) !important;
-          color: hsl(var(--foreground)) !important;
-          font-size: 18px !important;
-          backdrop-filter: blur(8px);
-          transition: all 0.2s ease-out;
-        }
-        
-        .leaflet-control-zoom-in {
-          border-top-left-radius: 8px !important;
-          border-top-right-radius: 8px !important;
-        }
-        
-        .leaflet-control-zoom-out {
-          border-bottom-left-radius: 8px !important;
-          border-bottom-right-radius: 8px !important;
-          border-top: none !important;
-        }
-        
-        .leaflet-control-zoom-in:hover,
-        .leaflet-control-zoom-out:hover {
-          background-color: rgba(255, 122, 92, 0.1) !important;
-          border-color: rgba(255, 122, 92, 0.4) !important;
-          color: rgb(255, 122, 92) !important;
-        }
-      `}</style>
-      
-      <div className={`
-        relative w-full
-        ${isPWABannerVisible 
-          ? 'h-[calc(100vh-172px)]' // 64px (top) + 44px (banner) + 64px (bottom)
-          : 'h-[calc(100vh-128px)]' // 64px (top) + 64px (bottom)
-        }
-        md:h-[calc(100vh-64px)] // Only top navbar on desktop
-      `}>
-        <MapContainer
-          center={userLocation ? [userLocation.lat, userLocation.lng] : defaultCenter}
-          zoom={13}
-          className="h-full w-full"
-          zoomControl={false}
-          attributionControl={false}
-          ref={setMap}
-          scrollWheelZoom={true}
-          dragging={true}
-          touchZoom={true}
-          doubleClickZoom={true}
-          boxZoom={true}
-          keyboard={true}
-        >
-          <TileLayer
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          />
-          <ZoomControl position="topright" />
-
-          {/* User location marker */}
-          {userLocation && (
-            <Marker
-              position={[userLocation.lat, userLocation.lng]}
-              icon={new L.Icon({
-                iconUrl: "/user-location.png",
-                iconSize: [24, 24],
-                iconAnchor: [12, 12],
-              })}
-            >
-              <Popup>Your Location</Popup>
-            </Marker>
-          )}
-
-          {/* Bus markers */}
-          {buses.map((bus) => (
-            <Marker
-              key={bus.id}
-              position={[bus.location.lat, bus.location.lng]}
-              icon={busIcon}
-            >
-              <Popup>
-                <div className="p-2">
-                  <h3 className="font-semibold">Bus #{bus.number}</h3>
-                  <p className="text-sm text-muted-foreground">{bus.route}</p>
-                  <p className="text-sm">Next Stop: {bus.nextStop}</p>
-                </div>
-              </Popup>
-            </Marker>
-          ))}
-        </MapContainer>
+    <div className="relative h-full w-full">
+      <div ref={mapContainerRef} className="h-full w-full" />
+      <div className="absolute top-4 right-4 z-[1000] flex flex-col gap-2">
+        <MapButton onClick={handleZoomIn}>
+          <Plus className="h-4 w-4 text-foreground" />
+        </MapButton>
+        <MapButton onClick={handleZoomOut}>
+          <Minus className="h-4 w-4 text-foreground" />
+        </MapButton>
+        <MapButton onClick={handleLocate}>
+          <Locate className="h-4 w-4 text-foreground" />
+        </MapButton>
       </div>
-    </>
+    </div>
   )
 }
+
+export default Map
+

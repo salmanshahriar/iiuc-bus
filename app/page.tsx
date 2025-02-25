@@ -5,8 +5,6 @@ import { motion, AnimatePresence } from "framer-motion"
 import { BusSearch } from "@/components/home/BusSearch"
 import { BusCard } from "@/components/home/BusCard"
 import { Clock, MapPin, Route, Search, Bus } from "lucide-react"
-import { useEffect } from "react";
-
 
 interface Bus {
   busId: number
@@ -51,7 +49,6 @@ const features = [
 ]
 
 export default function Home() {
-  
   const [liveBusData, setLiveBusData] = useState<Bus[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
@@ -59,8 +56,6 @@ export default function Home() {
 
   const currentDateTime = "2025-02-09 14:39:11"
   const userLogin = "user"
-
-
 
   const fetchLiveBusSchedules = async (params: { from: string; to: string; date: string }) => {
     setIsLoading(true)

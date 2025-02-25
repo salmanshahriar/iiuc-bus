@@ -1,115 +1,118 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { format } from "date-fns"
-import { Search, MapPin, School, AlertCircle, Clock, User, Navigation } from "lucide-react"
-import { motion, AnimatePresence } from "framer-motion"
-import { Button } from "@/components/ui/button"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { DatePicker } from "@/components/ui/date-picker"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { useState, useEffect } from "react";
+import { format } from "date-fns";
+import {
+  Search,
+  MapPin,
+  AlertCircle,
+  Clock,
+  User,
+  Navigation,
+  X,
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import {
+  Command,
+  CommandInput,
+  CommandList,
+  CommandItem,
+  CommandEmpty,
+} from "@/components/ui/command";
+import { DatePicker } from "@/components/ui/date-picker";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { fetchScheduleSuggestions } from "@/utils/api";
 
 interface BusSearchProps {
-  onSearch: (params: { from: string; to: string; date: string }) => Promise<void>
-  currentDateTime: string
-  userLogin: string
+  onSearch: (params: { from: string; to: string; date: string }) => Promise<void>;
+  currentDateTime: string;
+  userLogin: string;
 }
 
-const LOCATIONS = [
-  { value: "University", label: "University", isUniversity: true },
-  { value: "GEC", label: "GEC", isUniversity: false },
-  { value: "Agrabad", label: "Agrabad", isUniversity: false },
-  { value: "2 No. Gate", label: "2 No. Gate", isUniversity: false },
-  { value: "Muradpur", label: "Muradpur", isUniversity: false },
-  { value: "AK Khan", label: "AK Khan", isUniversity: false },
-  { value: "BOT", label: "BOT", isUniversity: false },
-] as const
-
 export function BusSearch({ onSearch, currentDateTime, userLogin }: BusSearchProps) {
-  const [from, setFrom] = useState("")
-  const [to, setTo] = useState("")
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
   const [date, setDate] = useState<Date>(() => {
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
-    return today
-  })
-  const [isSearching, setIsSearching] = useState(false)
-  const [validationError, setValidationError] = useState<string | null>(null)
-  const [searchError, setSearchError] = useState<string | null>(null)
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return today;
+  });
+  const [startPoints, setStartPoints] = useState<string[]>([]);
+  const [endPoints, setEndPoints] = useState<string[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [validationError, setValidationError] = useState<string | null>(null);
+  const [searchError, setSearchError] = useState<string | null>(null);
+  const [fromOpen, setFromOpen] = useState(false);
+  const [toOpen, setToOpen] = useState(false);
+
+  // Fetch location suggestions from API
+  useEffect(() => {
+    async function getScheduleSuggestions() {
+      try {
+        const data = await fetchScheduleSuggestions();
+        console.log("API Response:", data); // Debug API response
+        setStartPoints(data.startPoints || []);
+        setEndPoints(data.endPoints || []);
+      } catch (error) {
+        console.error("Failed to fetch schedule suggestions:", error);
+      }
+    }
+    getScheduleSuggestions();
+  }, []);
 
   // Validation logic
   const validateSelection = (fromVal: string, toVal: string) => {
-    if (!fromVal || !toVal) return null
-    if (fromVal === toVal) return "Cannot select the same location"
-    if (fromVal === "University" && toVal === "University") return "Cannot select University for both locations"
-    if (fromVal !== "University" && toVal !== "University") return "One location must be University"
-    return null
-  }
-
-  const handleFromChange = (value: string) => {
-    setFrom(value)
-    const error = validateSelection(value, to)
-    setValidationError(error)
-  }
-
-  const handleToChange = (value: string) => {
-    setTo(value)
-    const error = validateSelection(from, value)
-    setValidationError(error)
-  }
+    if (!fromVal || !toVal) return null;
+    if (fromVal === toVal) return "Cannot select the same location";
+    if (fromVal === "University" && toVal === "University")
+      return "Cannot select University for both locations";
+    if (fromVal !== "University" && toVal !== "University")
+      return "One location must be University";
+    return null;
+  };
 
   const handleSearch = async () => {
-    if (!from || !to || !date) return
+    if (!from || !to || !date) return;
 
-    const error = validateSelection(from, to)
+    const error = validateSelection(from, to);
     if (error) {
-      setValidationError(error)
-      return
+      setValidationError(error);
+      return;
     }
 
-    setIsSearching(true)
-    setSearchError(null)
+    setIsSearching(true);
+    setSearchError(null);
     try {
       await onSearch({
         from,
         to,
         date: format(date, "yyyy-MM-dd"),
-      })
+      });
     } catch (error) {
-      console.error("Search failed:", error)
-      setSearchError("Failed to fetch bus schedules. Please try again.")
+      console.error("Search failed:", error);
+      setSearchError("Failed to fetch bus schedules. Please try again.");
     } finally {
-      setIsSearching(false)
+      setIsSearching(false);
     }
-  }
+  };
 
-  const renderLocationItems = () => {
-    const sortedLocations = [...LOCATIONS].sort((a, b) => {
-      if (a.isUniversity) return -1
-      if (b.isUniversity) return 1
-      return a.label.localeCompare(b.label)
-    })
+  const clearFrom = () => {
+    setFrom("");
+    setValidationError(validateSelection("", to));
+    setFromOpen(false); // Optionally close suggestions
+  };
 
-    return sortedLocations.map((location) => (
-      <SelectItem key={location.value} value={location.value} className="group">
-        <div className="flex items-center gap-2">
-          <div className="relative">
-            {location.isUniversity ? (
-              <School className="h-4 w-4 text-primary group-hover:scale-110 transition-transform duration-200" />
-            ) : (
-              <MapPin className="h-4 w-4 text-muted-foreground group-hover:scale-110 transition-transform duration-200" />
-            )}
-          </div>
-          <span
-            className={`${location.isUniversity ? "text-primary font-medium" : ""} 
-            group-hover:text-primary transition-colors duration-200`}
-          >
-            {location.label}
-          </span>
-        </div>
-      </SelectItem>
-    ))
-  }
+  const clearTo = () => {
+    setTo("");
+    setValidationError(validateSelection(from, ""));
+    setToOpen(false); // Optionally close suggestions
+  };
 
   return (
     <div
@@ -128,24 +131,66 @@ export function BusSearch({ onSearch, currentDateTime, userLogin }: BusSearchPro
               <Navigation className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
               From
             </label>
-            <Select value={from} onValueChange={handleFromChange}>
-              <SelectTrigger
-                className="h-10 sm:h-12 bg-background/60 backdrop-blur-sm rounded-lg sm:rounded-xl 
-                border-border/50 text-sm
-                shadow-[0_4px_16px_-4px_rgba(0,0,0,0.08)] 
-                group-hover:shadow-[0_4px_20px_-4px_rgba(242,78,30,0.15)]
-                transition-all duration-300"
-              >
-                <SelectValue placeholder="Select departure" />
-              </SelectTrigger>
-              <SelectContent
-                className="rounded-lg sm:rounded-xl border-border/50 
-                shadow-[0_16px_48px_-12px_rgba(0,0,0,0.15)]
-                max-h-[240px] overflow-y-auto"
-              >
-                {renderLocationItems()}
-              </SelectContent>
-            </Select>
+            <div className="relative">
+              <Command>
+                <div className="relative">
+                  <CommandInput
+                    placeholder="Type departure location..."
+                    value={from}
+                    onValueChange={(value) => {
+                      setFrom(value);
+                      setFromOpen(true);
+                      setValidationError(validateSelection(value, to));
+                    }}
+                    onFocus={() => setFromOpen(true)}
+                    onBlur={() => setTimeout(() => setFromOpen(false), 200)}
+                    className="h-10 sm:h-12 bg-background/60 backdrop-blur-sm rounded-lg sm:rounded-xl 
+                      border-border/50 text-sm shadow-[0_4px_16px_-4px_rgba(0,0,0,0.08)] 
+                      group-hover:shadow-[0_4px_20px_-4px_rgba(242,78,30,0.15)] 
+                      transition-all duration-300 pr-10" // Added padding-right for X button
+                  />
+                  {from && (
+                    <button
+                      onClick={clearFrom}
+                      className="absolute right-2 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
+                {fromOpen && startPoints.length > 0 && (
+                  <CommandList className="absolute z-10 top-12 mt-1 w-full bg-background border rounded-md shadow-lg max-h-60 overflow-auto">
+                    <CommandEmpty>No location found.</CommandEmpty>
+                    {startPoints
+                      .filter((point) =>
+                        from ? point.toLowerCase().includes(from.toLowerCase()) : true
+                      )
+                      .map((point) => (
+                        <CommandItem
+                          key={point}
+                          value={point}
+                          onSelect={(selectedValue) => {
+                            setFrom(selectedValue);
+                            setFromOpen(false);
+                            setValidationError(validateSelection(selectedValue, to));
+                          }}
+                          className="cursor-pointer hover:bg-accent"
+                        >
+                          <span
+                            className={
+                              point === "University"
+                                ? "text-primary font-medium"
+                                : "text-foreground"
+                            }
+                          >
+                            {point}
+                          </span>
+                        </CommandItem>
+                      ))}
+                  </CommandList>
+                )}
+              </Command>
+            </div>
           </div>
 
           {/* To Location */}
@@ -154,24 +199,66 @@ export function BusSearch({ onSearch, currentDateTime, userLogin }: BusSearchPro
               <MapPin className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
               To
             </label>
-            <Select value={to} onValueChange={handleToChange}>
-              <SelectTrigger
-                className="h-10 sm:h-12 bg-background/60 backdrop-blur-sm rounded-lg sm:rounded-xl 
-                border-border/50 text-sm
-                shadow-[0_4px_16px_-4px_rgba(0,0,0,0.08)]
-                group-hover:shadow-[0_4px_20px_-4px_rgba(242,78,30,0.15)]
-                transition-all duration-300"
-              >
-                <SelectValue placeholder="Select destination" />
-              </SelectTrigger>
-              <SelectContent
-                className="rounded-lg sm:rounded-xl border-border/50 
-                shadow-[0_16px_48px_-12px_rgba(0,0,0,0.15)]
-                max-h-[240px] overflow-y-auto"
-              >
-                {renderLocationItems()}
-              </SelectContent>
-            </Select>
+            <div className="relative">
+              <Command>
+                <div className="relative">
+                  <CommandInput
+                    placeholder="Type destination location..."
+                    value={to}
+                    onValueChange={(value) => {
+                      setTo(value);
+                      setToOpen(true);
+                      setValidationError(validateSelection(from, value));
+                    }}
+                    onFocus={() => setToOpen(true)}
+                    onBlur={() => setTimeout(() => setToOpen(false), 200)}
+                    className="h-10 sm:h-12 bg-background/60 backdrop-blur-sm rounded-lg sm:rounded-xl 
+                      border-border/50 text-sm shadow-[0_4px_16px_-4px_rgba(0,0,0,0.08)] 
+                      group-hover:shadow-[0_4px_20px_-4px_rgba(242,78,30,0.15)] 
+                      transition-all duration-300 pr-10" // Added padding-right for X button
+                  />
+                  {to && (
+                    <button
+                      onClick={clearTo}
+                      className="absolute right-2 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
+                {toOpen && endPoints.length > 0 && (
+                  <CommandList className="absolute z-10 top-12 mt-1 w-full bg-background border rounded-md shadow-lg max-h-60 overflow-auto">
+                    <CommandEmpty>No location found.</CommandEmpty>
+                    {endPoints
+                      .filter((point) =>
+                        to ? point.toLowerCase().includes(to.toLowerCase()) : true
+                      )
+                      .map((point) => (
+                        <CommandItem
+                          key={point}
+                          value={point}
+                          onSelect={(selectedValue) => {
+                            setTo(selectedValue);
+                            setToOpen(false);
+                            setValidationError(validateSelection(from, selectedValue));
+                          }}
+                          className="cursor-pointer hover:bg-accent"
+                        >
+                          <span
+                            className={
+                              point === "University"
+                                ? "text-primary font-medium"
+                                : "text-foreground"
+                            }
+                          >
+                            {point}
+                          </span>
+                        </CommandItem>
+                      ))}
+                  </CommandList>
+                )}
+              </Command>
+            </div>
           </div>
         </div>
 
@@ -202,13 +289,13 @@ export function BusSearch({ onSearch, currentDateTime, userLogin }: BusSearchPro
             date={date}
             onDateChange={(newDate) => {
               if (newDate) {
-                setDate(newDate)
+                setDate(newDate);
               }
             }}
             disabled={(date) => {
-              const today = new Date()
-              today.setHours(0, 0, 0, 0)
-              return date < today
+              const today = new Date();
+              today.setHours(0, 0, 0, 0);
+              return date < today;
             }}
           />
         </div>
@@ -233,7 +320,6 @@ export function BusSearch({ onSearch, currentDateTime, userLogin }: BusSearchPro
                   className="absolute inset-0 rounded-lg sm:rounded-xl bg-gradient-to-r from-white/0 via-white/20 to-white/0 
                   opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                 />
-
                 {isSearching ? (
                   <div className="flex items-center gap-2">
                     <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
@@ -278,6 +364,5 @@ export function BusSearch({ onSearch, currentDateTime, userLogin }: BusSearchPro
         </div>
       </div>
     </div>
-  )
+  );
 }
-
