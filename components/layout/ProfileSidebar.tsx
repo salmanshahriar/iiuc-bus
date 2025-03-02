@@ -19,9 +19,9 @@ export function ProfileSidebar({ isOpen, onClose }: ProfileSidebarProps) {
 
   return (
     <div
-      className={`fixed inset-y-0 right-0 w-64 bg-background border-l transform ${
+      className={`fixed inset-y-0 right-0 w-full md:w-72 bg-background border-l transform ${
         isOpen ? "translate-x-0" : "translate-x-full"
-      } transition-transform duration-300 ease-in-out z-50`}
+      } transition-transform duration-300 ease-in-out z-[99999]`}
     >
       <div className="flex flex-col h-full p-4">
         <div className="flex justify-between items-center mb-6">
@@ -38,7 +38,7 @@ export function ProfileSidebar({ isOpen, onClose }: ProfileSidebarProps) {
           </Avatar>
           <div>
             <p className="font-medium">User Name</p>
-            <p className="text-sm text-muted-foreground">{translate("email")}: user@example.com</p>
+            <p className="text-sm text-muted-foreground">{translate("email")}: user@gmail.com</p>
           </div>
         </div>
 
@@ -55,29 +55,13 @@ export function ProfileSidebar({ isOpen, onClose }: ProfileSidebarProps) {
               <span className={language === "bn" ? "font-medium" : "text-muted-foreground"}>Bn</span>
             </div>
           </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="bus-type">{translate("busType")}</Label>
-            <Select value={busType} onValueChange={(value: any) => setBusType(value)}>
-              <SelectTrigger id="bus-type">
-                <SelectValue placeholder={translate("busType")} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="male">{translate("male")}</SelectItem>
-                <SelectItem value="female">{translate("female")}</SelectItem>
-                <SelectItem value="teacher">{translate("teacher")}</SelectItem>
-                <SelectItem value="administrative">{translate("administrative")}</SelectItem>
-                <SelectItem value="staff">{translate("staff")}</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-
-        <div className="mt-auto">
-          <Button variant="destructive" className="w-full" onClick={() => console.log("Logout clicked")}>
+          <Button variant="destructive" className="w-full mt-20" onClick={() => console.log("Logout clicked")}>
             <LogOut className="mr-2 h-4 w-4" /> {translate("logout")}
           </Button>
+
         </div>
+
+       
       </div>
     </div>
   )

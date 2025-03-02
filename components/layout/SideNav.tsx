@@ -24,7 +24,7 @@ export function SideNav() {
   useEffect(() => {
     document.documentElement.style.setProperty(
       '--sidebar-width',
-      `${isExpanded ? '18rem' : '5rem'}`
+      `${isExpanded ? '12rem' : '5rem'}`
     );
   }, [isExpanded]);
 
@@ -34,7 +34,7 @@ export function SideNav() {
         "fixed top-16 left-0 h-[calc(100vh-4rem)] z-50",
         "transition-all duration-300 ease-in-out",
         "hidden md:block",
-        isExpanded ? "w-72" : "w-20",
+        isExpanded ? "w-48" : "w-20",
         "bg-background border-r border-border/50",
         "hover:shadow-lg hover:shadow-primary/5"
       )}

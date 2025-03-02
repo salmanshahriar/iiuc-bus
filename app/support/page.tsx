@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -33,7 +32,7 @@ export default function SupportPage() {
 
   const handleSubmit = async () => {
     try {
-      const response = await fetch("http://147.93.107.88:5000/api/user/feedback", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/user/feedback`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -274,14 +273,13 @@ export default function SupportPage() {
               <Code className="h-5 w-5" />
               Developer Info
             </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
               {[
                 { name: "Md. Saiful Chowdhury", role: "Project Lead/ Backend" },
                 { name: "Salman Shahriar", role: "User Panel Frontend Lead" },
                 { name: "Md. Shahed Alam", role: "Admin Panel Frontend Lead" },
                 { name: "Towhidur Rahman Abid", role: "Admin Panel Frontend" },
-                { name: "Dipta Karmakar", role: "Admin Panel Frontend" },
-                { name: "Sazidul Islam Hira", role: "DevOps" },
+                { name: "Sazidul Islam Hira", role: "Security" },
               ].map((dev, index) => (
                 <div key={index} className="flex flex-col items-center text-center">
                   <div className="w-16 h-16 mb-2 rounded-full border border-[var(--primary-color)] flex items-center justify-center bg-muted">
@@ -292,10 +290,13 @@ export default function SupportPage() {
                 </div>
               ))}
             </div>
+            <div className="mt-6 text-center">
+              <h3 className="text-sm font-medium text-[var(--primary-color)] mb-2">Supported By:</h3>
+              <p className="text-xs text-muted-foreground">Mohammed Hasan, Minhaz Uddin</p>
+            </div>
           </CardContent>
         </Card>
       </div>
     </div>
   )
 }
-

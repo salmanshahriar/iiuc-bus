@@ -8,15 +8,30 @@ import { Bus, MapPin, X } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { BusList } from "@/components/nearby-bus/BusList"
 import BusTrackerLoading from "@/components/nearby-bus/loading"
-import type { Bus as BusType } from "@/types/bus"
 import ErrorBoundary from "@/components/nearby-bus/ErrorBoundary"
+import { Skeleton } from "@/components/ui/skeleton"
+
+interface BusType {
+  id: string
+  lat: number
+  lng: number
+  route?: string
+  name?: string
+}
 
 interface UserLocation {
   lat: number
   lng: number
 }
 
-
+interface MapProps {
+  buses: BusType[]
+  selectedBus: BusType | null
+  userLocation: UserLocation
+  onBusSelect: (bus: BusType | null) => void
+  trackSelectedBus: boolean
+  setTrackSelectedBus: (value: boolean) => void
+}
 
 const Map = dynamic(() => import("@/components/nearby-bus/Map"), {
   ssr: false,
@@ -26,10 +41,10 @@ const Map = dynamic(() => import("@/components/nearby-bus/Map"), {
 export default function NearbyBus() {
   const [selectedBus, setSelectedBus] = useState<BusType | null>(null)
   const [userLocation, setUserLocation] = useState<UserLocation | null>(null)
-  const [isInfoOpen, setIsInfoOpen] = useState(false)
+  const [isInfoOpen, setIsInfoOpen] = useState<boolean>(false)
   const [nearbyBuses, setNearbyBuses] = useState<BusType[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [trackSelectedBus, setTrackSelectedBus] = useState(false)
+  const [isLoading, setIsLoading] = useState<boolean>(true)
+  const [trackSelectedBus, setTrackSelectedBus] = useState<boolean>(false)
   const [locationError, setLocationError] = useState<string | null>(null)
 
   const updateUserLocation = useCallback(() => {
@@ -45,11 +60,11 @@ export default function NearbyBus() {
         (error) => {
           console.error("Error getting user location:", error)
           setLocationError("Unable to retrieve your location. Please enable location services and refresh the page.")
-        },
+        }
       )
     } else {
       setLocationError(
-        "Geolocation is not supported by your browser. Please use a modern browser with location services.",
+        "Geolocation is not supported by your browser. Please use a modern browser with location services."
       )
     }
   }, [])
@@ -66,12 +81,12 @@ export default function NearbyBus() {
     setIsLoading(true)
     try {
       const response = await fetch(
-        `http://147.93.107.88:5000/api/user/nearest-bus?userLat=${userLocation.lat}&userLon=${userLocation.lng}`,
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/user/nearest-bus?userLat=${userLocation.lat}&userLon=${userLocation.lng}`
       )
       if (!response.ok) {
         throw new Error("Failed to fetch nearby buses")
       }
-      const data = await response.json()
+      const data: BusType[] = await response.json()
       setNearbyBuses(data)
     } catch (error) {
       console.error("Error fetching nearby buses:", error)
@@ -96,28 +111,37 @@ export default function NearbyBus() {
   }, [])
 
   const InfoContent = () => (
-    <div className="flex flex-col h-full bg-transparent">
-      <div className="px-3 py-2 bg-background/50 backdrop-blur-xl border-b border-border/50 flex justify-between items-center">
-        <div>
-          <h2 className="text-base font-semibold">
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary">
+    <div className="flex flex-col h-screen w-full max-w-[150vw] z-[9999]">
+      <div className="px-3 py-2 bg-background/50 backdrop-blur-xl border-b border-border/50 flex justify-between items-center shrink-0">
+        <div className="w-full">
+          <h2 className="text-base font-semibold leading-tight truncate">
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-[var(--gradient-from)] via-[var(--gradient-via)] to-[var(--gradient-to)] animate-gradient">
               Nearby Buses
             </span>
           </h2>
-          <p className="text-xs text-muted-foreground">
-            {isLoading ? "Loading..." : `${nearbyBuses.length} buses found`}
+          <p className="text-xs text-muted-foreground truncate">
+            {isLoading ? `Refreshing...` : `${nearbyBuses.length} buses found`}
           </p>
         </div>
-        <Button variant="ghost" size="sm" onClick={() => setIsInfoOpen(false)} className="lg:hidden">
-          <X className="h-4 w-4" />
-        </Button>
       </div>
       <div className="flex-1 overflow-y-auto">
-        <div className="p-2 space-y-2">
+        <div className="p-2 space-y-2 min-h-full">
           {isLoading ? (
-            <BusTrackerLoading />
+            <div className="space-y-3">
+              {[1, 2, 3].map((item) => (
+                <div key={item} className="flex items-center space-x-2">
+                  <Skeleton className="h-8 w-8 rounded-full flex-shrink-0" />
+                  <div className="space-y-1 flex-1 min-w-0">
+                    <Skeleton className="h-3 w-2/3" />
+                    <Skeleton className="h-2 w-1/3" />
+                  </div>
+                </div>
+              ))}
+            </div>
           ) : nearbyBuses.length === 0 ? (
-            <div className="text-center py-4 text-sm text-muted-foreground">No buses found in your area</div>
+            <div className="text-center py-4 text-xs text-muted-foreground">
+              No buses found in your area
+            </div>
           ) : (
             <BusList
               buses={nearbyBuses}
@@ -129,11 +153,10 @@ export default function NearbyBus() {
         </div>
       </div>
     </div>
-  )
-
+  );
   if (locationError) {
     return (
-      <div className="h-screen w-screen flex items-center justify-center bg-background">
+      <div className="min-h-screen w-full flex items-center justify-center bg-background">
         <div className="text-center p-4">
           <h1 className="text-2xl font-bold mb-4">Location Error</h1>
           <p className="text-muted-foreground mb-4">{locationError}</p>
@@ -148,11 +171,11 @@ export default function NearbyBus() {
   }
 
   return (
-    <div className="h-screen w-screen flex flex-col overflow-hidden">
-      <div className="flex-grow flex h-full">
-        <div className="relative flex-grow h-full bg-background/95 backdrop-blur-sm overflow-hidden">
+    <div className="min-h-screen w-full flex flex-col">
+      <div className="flex flex-1 overflow-hidden">
+        <div className="flex-1 relative">
           <div className="absolute inset-0">
-            <div className="absolute top-4 left-4 z-[9999] lg:hidden">
+            <div className="absolute top-4 left-4 z-[9999] md:hidden">
               <Sheet open={isInfoOpen} onOpenChange={setIsInfoOpen}>
                 <SheetTrigger asChild>
                   <Button
@@ -170,7 +193,7 @@ export default function NearbyBus() {
                     </Badge>
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="left" className="w-full p-0 max-w-[300px] z-[10000]">
+                <SheetContent side="right" className="w-[300px] sm:w-[400px] p-0">
                   <InfoContent />
                 </SheetContent>
               </Sheet>
@@ -198,7 +221,7 @@ export default function NearbyBus() {
                 <Map
                   buses={nearbyBuses}
                   selectedBus={selectedBus}
-                  userLocation={userLocation}
+                  userLocation={userLocation!}
                   onBusSelect={handleBusSelect}
                   trackSelectedBus={trackSelectedBus}
                   setTrackSelectedBus={setTrackSelectedBus}
@@ -208,11 +231,10 @@ export default function NearbyBus() {
           </div>
         </div>
 
-        <div className="hidden lg:block w-[300px] border-l bg-background/80 backdrop-blur-sm">
+        <div className="hidden lg:block w-[300px] border-l bg-background/80 backdrop-blur-sm shrink-0">
           <InfoContent />
         </div>
       </div>
     </div>
   )
 }
-

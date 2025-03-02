@@ -8,7 +8,7 @@ import { motion } from "framer-motion"
 
 export default function LostAndFoundPage() {
   return (
-    <div className="min-h-[calc(100vh-4rem)] md:h-[calc(100vh-4rem)] md:fixed md:inset-0 md:top-16">
+    <div className="min-h-[calc(100vh-4rem)] md:h-[calc(100vh-4rem)] md:fixed md:inset-0 md:top-16 md:pb-20">
       {/* Mobile View - scrollable */}
       <div className="md:hidden p-4">
 

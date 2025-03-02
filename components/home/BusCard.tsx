@@ -5,7 +5,14 @@ import { Bus, Clock, MapPin, Users, Phone, Calendar, Info } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog"
 import { Separator } from "@/components/ui/separator"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
@@ -51,12 +58,7 @@ export function BusCard({ bus, className }: BusCardProps) {
 
   return (
     <motion.div variants={cardVariants} initial="hidden" animate="visible" whileHover="hover">
-      <Card
-        className={cn(
-          "overflow-hidden transition-all duration-300 ease-in-out hover:shadow-lg bg-card relative",
-          className,
-        )}
-      >
+      <Card className={cn("overflow-hidden hover:shadow-lg bg-card relative", className)}>
         {bus.gender && (
           <Badge
             variant="secondary"
@@ -64,7 +66,7 @@ export function BusCard({ bus, className }: BusCardProps) {
               "absolute top-4 right-4 text-xs font-semibold px-3 py-1 rounded-full",
               bus.gender.toLowerCase() === "male"
                 ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
-                : "bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-200",
+                : "bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-200"
             )}
           >
             <Users className="w-3 h-3 mr-1 inline-block" />
@@ -83,18 +85,18 @@ export function BusCard({ bus, className }: BusCardProps) {
             </div>
           </div>
 
-          <div className="space-y-2">
-            <div className="flex items-center text-sm">
-              <MapPin className="h-4 w-4 text-muted-foreground mr-2 flex-shrink-0" />
-              <p className="text-muted-foreground">{bus.routeName}</p>
+          <div className="space-y-2 text-sm">
+            <div className="flex items-center">
+              <MapPin className="h-4 w-4 text-muted-foreground mr-2" />
+              {bus.routeName}
             </div>
-            <div className="flex items-center text-sm">
-              <Clock className="h-4 w-4 text-muted-foreground mr-2 flex-shrink-0" />
-              <span>{formattedTime}</span>
+            <div className="flex items-center">
+              <Clock className="h-4 w-4 text-muted-foreground mr-2" />
+              {formattedTime}
             </div>
-            <div className="flex items-center text-sm">
-              <Calendar className="h-4 w-4 text-muted-foreground mr-2 flex-shrink-0" />
-              <span>{bus.scheduleDate}</span>
+            <div className="flex items-center">
+              <Calendar className="h-4 w-4 text-muted-foreground mr-2" />
+              {bus.scheduleDate}
             </div>
           </div>
         </CardContent>
@@ -112,15 +114,6 @@ export function BusCard({ bus, className }: BusCardProps) {
                 <DialogDescription>Details for Bus No: {bus.busNo}</DialogDescription>
               </DialogHeader>
               <div className="grid gap-4 py-4">
-                <div className="grid grid-cols-2 items-center gap-4">
-                  <Badge variant="outline" className="justify-center">
-                    {bus.busType}
-                  </Badge>
-                  <Badge variant="outline" className="justify-center">
-                    Capacity: {bus.capacity}
-                  </Badge>
-                </div>
-                <Separator />
                 <div className="space-y-2">
                   <h4 className="font-semibold">Route Information</h4>
                   <p className="text-sm">
@@ -161,23 +154,19 @@ export function BusCard({ bus, className }: BusCardProps) {
                     <div>
                       <p className="text-sm font-medium">Driver</p>
                       <p className="text-sm flex items-center">
-                        <Users className="h-3 w-3 mr-1" />
-                        {bus.driverName}
+                        <Users className="h-3 w-3 mr-1" /> {bus.driverName}
                       </p>
                       <p className="text-sm flex items-center">
-                        <Phone className="h-3 w-3 mr-1" />
-                        {bus.driverPhone}
+                        <Phone className="h-3 w-3 mr-1" /> {bus.driverPhone}
                       </p>
                     </div>
                     <div>
                       <p className="text-sm font-medium">Helper</p>
                       <p className="text-sm flex items-center">
-                        <Users className="h-3 w-3 mr-1" />
-                        {bus.helperName}
+                        <Users className="h-3 w-3 mr-1" /> {bus.helperName}
                       </p>
                       <p className="text-sm flex items-center">
-                        <Phone className="h-3 w-3 mr-1" />
-                        {bus.helperPhone}
+                        <Phone className="h-3 w-3 mr-1" /> {bus.helperPhone}
                       </p>
                     </div>
                   </div>
@@ -186,10 +175,9 @@ export function BusCard({ bus, className }: BusCardProps) {
                   <>
                     <Separator />
                     <div className="space-y-2">
-                      <h4 className="font-semibold">Additional Information</h4>
+                      <h4 className="font-semibold">Additional Info</h4>
                       <p className="text-sm flex items-start">
-                        <Info className="h-4 w-4 mr-2 mt-0.5 flex-shrink-0" />
-                        {bus.additionalInfo}
+                        <Info className="h-4 w-4 mr-2 mt-0.5" /> {bus.additionalInfo}
                       </p>
                     </div>
                   </>
@@ -197,10 +185,7 @@ export function BusCard({ bus, className }: BusCardProps) {
               </div>
             </DialogContent>
           </Dialog>
-          <Button
-            size="sm"
-            className="bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-medium flex-1"
-          >
+          <Button size="sm" className="text-xs font-medium flex-1">
             <Link href={`/track?bus=${bus.busNo}`} className="w-full">
               Live Track
             </Link>
@@ -210,4 +195,3 @@ export function BusCard({ bus, className }: BusCardProps) {
     </motion.div>
   )
 }
-

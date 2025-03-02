@@ -40,4 +40,3 @@ export const BusList: React.FC<BusListProps> = ({ buses, onBusSelect, selectedBu
     </div>
   )
 }
-

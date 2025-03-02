@@ -1,33 +1,14 @@
 "use client"
 
-import { Bus, Home, Filter, X } from "lucide-react"
+import { Bus, Check, X, AlertCircle } from "lucide-react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { useState, useMemo } from "react"
-
-const LOCATIONS = [
-  { value: "University", label: "University", isUniversity: true },
-  { value: "GEC", label: "GEC", isUniversity: false },
-  { value: "Agrabad", label: "Agrabad", isUniversity: false },
-  { value: "2No.Gate", label: "2 No. Gate", isUniversity: false },
-  { value: "Muradpur", label: "Muradpur", isUniversity: false },
-  { value: "AKKhan", label: "AK Khan", isUniversity: false },
-  { value: "BOT", label: "BOT", isUniversity: false },
-] as const
-
-const SCHEDULE_TYPES = [
-  "Regular Schedule",
-  "Residential Schedule",
-  "Friday Schedule",
-  "Library Schedule",
-  "Exam Schedule",
-  "Special Schedule",
-] as const
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import React, { useState, useMemo, useEffect, useRef } from "react"
+import { motion, AnimatePresence } from "framer-motion"
+import { fetchScheduleSuggestions } from "@/utils/api"
 
 interface Schedule {
   id: number
@@ -51,9 +32,29 @@ function formatTime(time: string): string {
 
 export default function ScheduleView({ schedules }: ScheduleViewProps) {
   const [direction, setDirection] = useState<"to" | "from">("to")
-  const [selectedLocations, setSelectedLocations] = useState<string[]>([])
-  const [selectedTypes, setSelectedTypes] = useState<string[]>([])
-  const [isFilterOpen, setIsFilterOpen] = useState(false)
+  const [startPoints, setStartPoints] = useState<string[]>([])
+  const [endPoints, setEndPoints] = useState<string[]>([])
+  const [inputValue, setInputValue] = useState("")
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const [scheduleTypeFilter, setScheduleTypeFilter] = useState("all")
+  const [validationError, setValidationError] = useState("")
+  const [searchError, setSearchError] = useState("")
+
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    async function getScheduleSuggestions() {
+      try {
+        const data = await fetchScheduleSuggestions()
+        setStartPoints(data.startPoints || [])
+        setEndPoints(data.endPoints || [])
+      } catch (error) {
+        console.error("Failed to fetch schedule suggestions:", error)
+        setSearchError("Failed to load location suggestions.")
+      }
+    }
+    getScheduleSuggestions()
+  }, [])
 
   const filteredSchedules = useMemo(() => {
     return schedules.filter((schedule) => {
@@ -63,235 +64,234 @@ export default function ScheduleView({ schedules }: ScheduleViewProps) {
             !schedule.startPoint.toLowerCase().includes("iiuc")
           : schedule.startPoint.toLowerCase().includes("university") ||
             schedule.startPoint.toLowerCase().includes("iiuc")
-
-      const matchesLocation =
-        selectedLocations.length === 0 ||
-        selectedLocations.some(
-          (location) => schedule.startPoint.includes(location) || schedule.endPoint.includes(location),
-        )
-
-      const matchesType = selectedTypes.length === 0 || selectedTypes.includes(schedule.scheduleType)
-
-      return matchesDirection && matchesLocation && matchesType
+      const matchesInput = !inputValue || 
+        (direction === "to" 
+          ? schedule.startPoint.toLowerCase().includes(inputValue.toLowerCase())
+          : schedule.endPoint.toLowerCase().includes(inputValue.toLowerCase()))
+      const matchesType = scheduleTypeFilter === "all" || schedule.scheduleType === scheduleTypeFilter
+      return matchesDirection && matchesInput && matchesType
     })
-  }, [schedules, direction, selectedLocations, selectedTypes])
+  }, [schedules, direction, inputValue, scheduleTypeFilter])
 
-  const FilterDialog = () => {
-    const [tempLocations, setTempLocations] = useState<string[]>(selectedLocations)
-    const [tempTypes, setTempTypes] = useState<string[]>(selectedTypes)
-
-    const toggleLocation = (value: string) => {
-      setTempLocations((prev) => (prev.includes(value) ? prev.filter((l) => l !== value) : [...prev, value]))
-    }
-
-    const toggleType = (value: string) => {
-      setTempTypes((prev) => (prev.includes(value) ? prev.filter((t) => t !== value) : [...prev, value]))
-    }
-
-    const handleDone = () => {
-      setSelectedLocations(tempLocations)
-      setSelectedTypes(tempTypes)
-      setIsFilterOpen(false)
-    }
-
-    const handleReset = () => {
-      setTempLocations([])
-      setTempTypes([])
-    }
-
-    return (
-      <Dialog open={isFilterOpen} onOpenChange={setIsFilterOpen}>
-        <DialogTrigger asChild>
-          <Button variant="outline" className="gap-2">
-            <Filter className="h-4 w-4" />
-            Filter
-            {(selectedLocations.length > 0 || selectedTypes.length > 0) && (
-              <Badge variant="secondary" className="ml-1">
-                {selectedLocations.length + selectedTypes.length}
-              </Badge>
-            )}
-          </Button>
-        </DialogTrigger>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Filter Schedules</DialogTitle>
-          </DialogHeader>
-          <Tabs defaultValue="locations" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="locations">Locations</TabsTrigger>
-              <TabsTrigger value="types">Schedule Types</TabsTrigger>
-            </TabsList>
-            <TabsContent value="locations">
-              <ScrollArea className="h-[300px] w-full rounded-md border p-4">
-                <div className="grid grid-cols-2 gap-2">
-                  {LOCATIONS.map((location) => (
-                    <Button
-                      key={location.value}
-                      variant={tempLocations.includes(location.value) ? "default" : "outline"}
-                      className="justify-start"
-                      onClick={() => toggleLocation(location.value)}
-                    >
-                      {location.label}
-                    </Button>
-                  ))}
-                </div>
-              </ScrollArea>
-            </TabsContent>
-            <TabsContent value="types">
-              <ScrollArea className="h-[300px] w-full rounded-md border p-4">
-                <div className="grid grid-cols-2 gap-2">
-                  {SCHEDULE_TYPES.map((type) => (
-                    <Button
-                      key={type}
-                      variant={tempTypes.includes(type) ? "default" : "outline"}
-                      className="justify-start"
-                      onClick={() => toggleType(type)}
-                    >
-                      {type}
-                    </Button>
-                  ))}
-                </div>
-              </ScrollArea>
-            </TabsContent>
-          </Tabs>
-          <div className="mt-4 space-y-2">
-            <div className="text-sm font-medium">Active Filters:</div>
-            <div className="flex flex-wrap gap-2">
-              {tempLocations.map((location) => (
-                <Badge key={location} variant="secondary" className="gap-1">
-                  {location}
-                  <X className="h-3 w-3 cursor-pointer" onClick={() => toggleLocation(location)} />
-                </Badge>
-              ))}
-              {tempTypes.map((type) => (
-                <Badge key={type} variant="secondary" className="gap-1">
-                  {type}
-                  <X className="h-3 w-3 cursor-pointer" onClick={() => toggleType(type)} />
-                </Badge>
-              ))}
-            </div>
-          </div>
-          <div className="flex justify-between mt-4">
-            <Button variant="outline" onClick={handleReset}>
-              Reset
-            </Button>
-            <Button onClick={handleDone}>Apply Filters</Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-    )
+  const clearInput = () => {
+    setInputValue("")
+    setValidationError("")
+    setIsDropdownOpen(false)
+    if (inputRef.current) inputRef.current.focus()
   }
 
-  // Mobile view
-  const MobileView = () => (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-4">
-        <div className="grid grid-cols-2 gap-2">
-          <Button
-            variant={direction === "to" ? "default" : "secondary"}
-            className="w-full py-6"
-            onClick={() => setDirection("to")}
-          >
-            <Bus className="mr-2 h-5 w-5" />
-            To University
-          </Button>
-          <Button
-            variant={direction === "from" ? "default" : "secondary"}
-            className="w-full py-6"
-            onClick={() => setDirection("from")}
-          >
-            <Home className="mr-2 h-5 w-5" />
-            From University
-          </Button>
-        </div>
-        <FilterDialog />
+  const validateSelection = (value: string) => {
+    if (direction === "to" && value.toLowerCase() === "university") {
+      return "Start point cannot be University when going to University."
+    }
+    if (direction === "from" && value.toLowerCase() === "university") {
+      return "End point cannot be University when coming from University."
+    }
+    return ""
+  }
+
+  const handleDirectionChange = (newDirection: "to" | "from") => {
+    setDirection(newDirection)
+    setInputValue("")
+    setValidationError("")
+    setIsDropdownOpen(false)
+  }
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value
+    setInputValue(newValue)
+    setIsDropdownOpen(true)
+    setValidationError(validateSelection(newValue))
+  }
+
+  const handleOptionSelect = (option: string) => {
+    setInputValue(option)
+    setIsDropdownOpen(false)
+    setValidationError(validateSelection(option))
+  }
+
+  const FilterSection = () => (
+    <div className="space-y-3 mb-4">
+      {/* Buttons in a row */}
+      <div className="flex flex-row gap-2 mb-4">
+        <Button
+          variant="secondary"
+          className={`flex-1 h-12 text-sm bg-[#2c3e50] text-white hover:bg-[#34495e] rounded-lg flex items-center justify-center gap-2 ${direction === "to" ? "ring-2 ring-primary" : ""}`}
+          onClick={() => handleDirectionChange("to")}
+        >
+          <Bus className="h-5 w-5" />
+          To University
+        </Button>
+        <Button
+          variant="secondary"
+          className={`flex-1 h-12 text-sm bg-[#2c3e50] text-white hover:bg-[#34495e] rounded-lg flex items-center justify-center gap-2 ${direction === "from" ? "ring-2 ring-primary" : ""}`}
+          onClick={() => handleDirectionChange("from")}
+        >
+          <Check className="h-5 w-5" />
+          From University
+        </Button>
       </div>
 
+      {/* Filter div with border and title */}
+      <div className="border rounded-md p-4">
+        <h3 className="text-sm font-medium mb-2">Filter</h3>
+        <div className="flex flex-col gap-3">
+          <div className="relative">
+            <input
+              ref={inputRef}
+              type="text"
+              value={inputValue}
+              onChange={handleInputChange}
+              onFocus={() => setIsDropdownOpen(true)}
+              onBlur={() => setTimeout(() => setIsDropdownOpen(false), 200)}
+              placeholder={direction === "to" ? "Start Point..." : "End Point..."}
+              className="h-10 text-sm w-full pr-8 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+            {inputValue && (
+              <button
+                onClick={clearInput}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+            {isDropdownOpen && (direction === "to" ? startPoints : endPoints).length > 0 && (
+              <div className="absolute z-10 w-full bg-background border rounded-md shadow-lg max-h-48 overflow-auto top-full mt-1">
+                {(direction === "to" ? startPoints : endPoints)
+                  .filter((option) => inputValue ? option.toLowerCase().includes(inputValue.toLowerCase()) : true)
+                  .map((option) => (
+                    <div
+                      key={option}
+                      onMouseDown={() => handleOptionSelect(option)}
+                      className="cursor-pointer hover:bg-accent text-sm py-1.5 px-2"
+                    >
+                      {option}
+                    </div>
+                  ))}
+                {(direction === "to" ? startPoints : endPoints)
+                  .filter((option) => inputValue ? option.toLowerCase().includes(inputValue.toLowerCase()) : true).length === 0 && (
+                  <div className="text-sm text-muted-foreground p-2">
+                    No location found.
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+          <Select value={scheduleTypeFilter} onValueChange={setScheduleTypeFilter}>
+            <SelectTrigger className="h-10 text-sm w-full">
+              <SelectValue placeholder="Schedule Type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Types</SelectItem>
+              <SelectItem value="Regular Schedule">Regular</SelectItem>
+              <SelectItem value="Residential Schedule">Residential</SelectItem>
+              <SelectItem value="Friday Schedule">Friday</SelectItem>
+              <SelectItem value="Library Schedule">Library</SelectItem>
+              <SelectItem value="Exam Schedule">Exam</SelectItem>
+              <SelectItem value="Special Schedule">Special</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      {/* Error messages */}
+      <AnimatePresence>
+        {(validationError || searchError) && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="flex items-center gap-2 text-xs text-destructive p-2 rounded-md bg-destructive/10"
+          >
+            <AlertCircle className="h-3 w-3" />
+            <span>{validationError || searchError}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  )
+
+  const MobileView = () => (
+    <div className="grid grid-rows-[auto_1fr] min-h-[calc(100vh-2rem)] px-4">
+      <div>
+        <FilterSection />
+      </div>
       {filteredSchedules.length === 0 ? (
-        <div className="text-center py-8 text-muted-foreground">
-          No bus schedules available {direction === "to" ? "to" : "from"} university at this time.
+        <div className="text-center py-6 text-sm text-muted-foreground">
+          No bus schedules available.
         </div>
       ) : (
-        <div className="space-y-4">
-          {filteredSchedules.map((schedule) => (
-            <Card key={schedule.id}>
-              <CardContent className="pt-6">
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center">
-                    <h3 className="font-semibold">{schedule.scheduleName}</h3>
-                    <span className="text-sm font-medium">{formatTime(schedule.time)}</span>
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    <div>Route: {schedule.route}</div>
-                    <div className="flex flex-col mt-2">
-                      <span>From: {schedule.startPoint}</span>
-                      <span>To: {schedule.endPoint}</span>
+        <ScrollArea className="overflow-auto">
+          <div className="space-y-3 pb-4">
+            {filteredSchedules.map((schedule) => (
+              <Card key={schedule.id}>
+                <CardContent className="p-4">
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-start gap-2">
+                      <h3 className="font-semibold text-sm truncate">{schedule.scheduleName}</h3>
+                      <span className="text-sm font-medium whitespace-nowrap">{formatTime(schedule.time)}</span>
+                    </div>
+                    <div className="text-sm text-muted-foreground space-y-1">
+                      <div className="truncate">Route: {schedule.route}</div>
+                      <div className="space-y-1">
+                        <div className="truncate">From: {schedule.startPoint}</div>
+                        <div className="truncate">To: {schedule.endPoint}</div>
+                      </div>
+                      <div className="pt-1 border-t truncate">{schedule.scheduleType}</div>
                     </div>
                   </div>
-                  <div className="text-xs text-muted-foreground mt-2 pt-2 border-t">{schedule.scheduleType}</div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </ScrollArea>
       )}
     </div>
   )
 
-  // Desktop view (table)
   const DesktopView = () => (
-    <>
-      <div className="flex justify-between items-center mb-4">
-        <div className="flex gap-2">
-          <Button variant={direction === "to" ? "default" : "secondary"} onClick={() => setDirection("to")}>
-            <Bus className="mr-2 h-4 w-4" />
-            To University
-          </Button>
-          <Button variant={direction === "from" ? "default" : "secondary"} onClick={() => setDirection("from")}>
-            <Home className="mr-2 h-4 w-4" />
-            From University
-          </Button>
-        </div>
-        <FilterDialog />
-      </div>
-      <ScrollArea className="rounded-md border">
+    <div className="flex flex-col min-h-screen px-4 space-y-6">
+      {/* Filter Section */}
+      <FilterSection />
+
+      {/* Table Section */}
+      <div className="flex-1">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Schedule Name</TableHead>
-              <TableHead>Route</TableHead>
-              <TableHead>Time</TableHead>
-              <TableHead>Start Point</TableHead>
-              <TableHead>End Point</TableHead>
-              <TableHead>Schedule Type</TableHead>
+              <TableHead className="text-sm">Schedule Name</TableHead>
+              <TableHead className="text-sm">Route</TableHead>
+              <TableHead className="text-sm">Time</TableHead>
+              <TableHead className="text-sm">Start Point</TableHead>
+              <TableHead className="text-sm">End Point</TableHead>
+              <TableHead className="text-sm">Schedule Type</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredSchedules.map((schedule) => (
               <TableRow key={schedule.id}>
-                <TableCell>{schedule.scheduleName}</TableCell>
-                <TableCell>{schedule.route}</TableCell>
-                <TableCell>{formatTime(schedule.time)}</TableCell>
-                <TableCell>{schedule.startPoint}</TableCell>
-                <TableCell>{schedule.endPoint}</TableCell>
-                <TableCell>{schedule.scheduleType}</TableCell>
+                <TableCell className="truncate text-sm">{schedule.scheduleName}</TableCell>
+                <TableCell className="truncate text-sm">{schedule.route}</TableCell>
+                <TableCell className="text-sm">{formatTime(schedule.time)}</TableCell>
+                <TableCell className="truncate text-sm">{schedule.startPoint}</TableCell>
+                <TableCell className="truncate text-sm">{schedule.endPoint}</TableCell>
+                <TableCell className="truncate text-sm">{schedule.scheduleType}</TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
-      </ScrollArea>
-    </>
+      </div>
+    </div>
   )
 
   return (
-    <>
+    <div className="container mx-auto py-4">
       <div className="block md:hidden">
         <MobileView />
       </div>
       <div className="hidden md:block">
         <DesktopView />
       </div>
-    </>
+    </div>
   )
 }
-

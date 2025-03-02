@@ -10,7 +10,7 @@ export function PageWrapper({ children }: { children: React.ReactNode }) {
       transition-all duration-300 
       md:ml-[var(--sidebar-width,5rem)]
       pt-16
-      ${isPWABannerVisible ? 'max-md:pt-[108px]' : ''}
+      ${isPWABannerVisible ? 'max-md:pt-[60px]' : ''}
       relative
     `}>
       {children}
