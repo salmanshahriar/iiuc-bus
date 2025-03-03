@@ -184,7 +184,7 @@ export default function Home() {
   )
 
   return (
-    <div className="min-h-screen md:h-[calc(100vh-60px)] bg-gradient-to-br from-background via-background/95 to-background dark:bg-gray-950">
+    <div className="md:h-[calc(100vh-4rem)] bg-gradient-to-br from-background via-background/95 to-background dark:bg-gray-950">
       {/* Mobile View */}
       <div className="block md:hidden overflow-auto">
         <div className="p-4 space-y-6">

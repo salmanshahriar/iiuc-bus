@@ -11,6 +11,7 @@ interface Bus {
   latitude: string;
   longitude: string;
   speed: string;
+  distance: string;
 }
 
 interface LatLng {
@@ -93,7 +94,7 @@ const Map = ({
     mapInitializedRef.current = true;
 
     // Add user marker
-    const userIcon = createCustomIcon("map-pin", "#0000FF", false);
+    const userIcon = createCustomIcon("map-pin", "#0082ff", false);
     userMarkerRef.current = L.marker([userLocation.lat, userLocation.lng], { icon: userIcon })
       .addTo(newMap)
       .bindPopup("Your Location");
@@ -135,14 +136,14 @@ const Map = ({
       if (isNaN(lat) || isNaN(lng)) return;
 
       const isSelected = selectedBus?.vehicleID === bus.vehicleID;
-      const busIcon = createCustomIcon("bus", isSelected ? "#63ff00" : "#0000FF", isSelected);
+      const busIcon = createCustomIcon("bus", isSelected ? "#0082ff" : "#0082ff", isSelected);
 
       if (busMarkersRef.current[bus.vehicleID]) {
         busMarkersRef.current[bus.vehicleID].setLatLng([lat, lng]).setIcon(busIcon);
       } else {
         const marker = L.marker([lat, lng], { icon: busIcon })
           .addTo(map)
-          .bindPopup(`Bus ID: ${bus.vehicleID}<br>Speed: ${bus.speed} km/h`);
+          .bindPopup(`Bus ID: ${bus.vehicleID}<br>Speed: ${bus.speed} km/h <br>Distance: ${bus.distance} km`);
 
         marker.on("click", () => {
           onBusSelect(bus);

@@ -8,87 +8,91 @@ import { motion } from "framer-motion"
 
 export default function LostAndFoundPage() {
   return (
-    <div className="min-h-[calc(100vh-4rem)] md:h-[calc(100vh-4rem)] md:fixed md:inset-0 md:top-16 md:pb-20">
-      {/* Mobile View - scrollable */}
-      <div className="md:hidden p-4">
-
+    <div className="min-h-[calc(100vh-4rem)] bg-background pb-20 md:pb-0">
+      {/* Mobile View */}
+      <div className="md:hidden container mx-auto px-4 py-6 ">
         <Tabs defaultValue="lost" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-8">
-            <TabsTrigger value="lost">
-              <Search className="h-4 w-4 mr-2" /> Lost something?
+          <TabsList className="grid grid-cols-2 w-full mb-6 bg-muted rounded-lg h-15">
+            <TabsTrigger 
+              value="lost"
+              className="data-[state=active]:bg-background data-[state=active]:shadow-sm py-2"
+            >
+              <Search className="h-4 w-4 mr-2" /> Lost Something?
             </TabsTrigger>
-            <TabsTrigger value="found">
-              <CheckCircle className="h-4 w-4 mr-2" /> Found items!
+            <TabsTrigger 
+              value="found"
+              className="data-[state=active]:bg-background data-[state=active]:shadow-sm py-2"
+            >
+              <CheckCircle className="h-4 w-4 mr-2" /> Found Items
             </TabsTrigger>
           </TabsList>
+          
           <TabsContent value="lost" className="mt-0">
-            <LostItemForm />
-          </TabsContent>
-          <TabsContent value="found" className="mt-0">
-            <div className="grid gap-4">
-              <FoundItemsList />
+            <div className="bg-background rounded-lg shadow-sm">
+              <LostItemForm />
             </div>
+          </TabsContent>
+          
+          <TabsContent value="found" className="mt-0">
+            <FoundItemsList />
           </TabsContent>
         </Tabs>
       </div>
 
-      {/* Desktop View - Fixed */}
-      <div className="hidden md:flex h-full ">
-        {/* Left side */}
-        <div className="flex-1 flex items-center justify-center px-16 ml-20">
-          <div className="max-w-2xl w-full space-y-8">
-            <div className="space-y-6">
-              <h1 className="text-center text-6xl font-bold leading-tight tracking-tight">
-                <span className="bg-clip-text text-transparent bg-gradient-to-r from-[var(--gradient-from)] to-[var(--gradient-to)] animate-gradient">
+      {/* Desktop View */}
+      <div className="hidden md:flex container mx-auto h-[calc(100vh-4rem)] py-8 gap-8">
+        {/* Left Section - Lost Form */}
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          className="w-1/2 flex items-center"
+        >
+          <div className="w-full space-y-8">
+            <div className="text-center space-y-4">
+              <h1 className="text-4xl lg:text-5xl font-bold tracking-tight">
+                <span className="bg-clip-text text-transparent bg-gradient-to-r from-[var(--gradient-from)] to-[var(--gradient-to)]">
                   Lost Something?
                 </span>
               </h1>
-              <p className="text-center text-xl text-muted-foreground/80">
-                Report lost items or check found items in one place
+              <p className="text-lg text-muted-foreground max-w-md mx-auto">
+                Report lost items or check found items in one convenient place
               </p>
             </div>
 
-            <div className="bg-background/40 backdrop-blur-xl rounded-2xl p-8
-              border border-border/50 shadow-[0_8px_32px_rgba(0,0,0,0.04)]
-              hover:shadow-[0_16px_48px_rgba(0,0,0,0.08)] transition-all duration-300
-              hover:border-primary/20">
+            <div className="bg-background/95 backdrop-blur-md rounded-xl shadow-lg
+              border border-border/40 transition-all duration-300
+              hover:shadow-xl hover:border-primary/30">
               <LostItemForm />
             </div>
           </div>
-        </div>
+        </motion.div>
 
-        {/* Right side */}
-        <div className="w-[450px] border-l">
-          <motion.div
-            key="found-items"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="h-full flex flex-col"
-          >
-            <div className="flex-shrink-0 px-6 lg:px-8 py-6 bg-background/50 backdrop-blur-xl border-b border-border/50">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-2xl font-semibold">
-                    <span className=" bg-clip-text text-transparent bg-gradient-to-r from-[var(--gradient-from)] via-[var(--gradient-via)] to-[var(--gradient-to)]">
-                      Found Items
-                    </span>
-                  </h2>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Recently found items from buses
-                  </p>
-                </div>
+        {/* Right Section - Found Items */}
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          className="w-1/2 flex flex-col"
+        >
+          <div className="h-full flex flex-col">
+            <div className="flex-shrink-0 py-6 border-b border-border/50">
+              <div className="space-y-1">
+                <h2 className="text-2xl font-semibold">
+                  <span className="bg-clip-text text-transparent bg-gradient-to-r from-[var(--gradient-from)] via-[var(--gradient-via)] to-[var(--gradient-to)]">
+                    Found Items
+                  </span>
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  Recently recovered items from buses
+                </p>
               </div>
             </div>
-
-            <div className="flex-1 overflow-y-auto">
-              <div className="p-4 lg:p-6 space-y-4">
-                <FoundItemsList />
-              </div>
+            
+            <div className="flex-1 overflow-y-auto py-6">
+              <FoundItemsList />
             </div>
-          </motion.div>
-        </div>
+          </div>
+        </motion.div>
       </div>
     </div>
   )
 }
-

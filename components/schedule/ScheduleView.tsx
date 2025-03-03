@@ -1,6 +1,6 @@
 "use client"
 
-import { Bus, Check, X, AlertCircle } from "lucide-react"
+import { Bus, Check, X, AlertCircle, Clock } from "lucide-react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -8,7 +8,9 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import React, { useState, useMemo, useEffect, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
+import { Input } from "@/components/ui/input"
 import { fetchScheduleSuggestions } from "@/utils/api"
+import useDebounce from "@/hooks/use-debounce"
 
 interface Schedule {
   id: number
@@ -31,15 +33,25 @@ function formatTime(time: string): string {
 }
 
 export default function ScheduleView({ schedules }: ScheduleViewProps) {
+  if (!Array.isArray(schedules)) {
+    return (
+      <div className="container mx-auto py-4 text-center text-red-500">
+        Error: Invalid schedule data received.
+      </div>
+    )
+  }
+
   const [direction, setDirection] = useState<"to" | "from">("to")
   const [startPoints, setStartPoints] = useState<string[]>([])
   const [endPoints, setEndPoints] = useState<string[]>([])
   const [inputValue, setInputValue] = useState("")
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const [isInputFocused, setIsInputFocused] = useState(false) // Explicit focus state
   const [scheduleTypeFilter, setScheduleTypeFilter] = useState("all")
   const [validationError, setValidationError] = useState("")
   const [searchError, setSearchError] = useState("")
-
+  const debouncedInputValue = useDebounce(inputValue, 200)
+  const filterRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -56,6 +68,21 @@ export default function ScheduleView({ schedules }: ScheduleViewProps) {
     getScheduleSuggestions()
   }, [])
 
+  // Handle clicks outside to unfocus input and close popover
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (filterRef.current && !filterRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false)
+        setIsInputFocused(false)
+        inputRef.current?.blur()
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside)
+    }
+  }, [])
+
   const filteredSchedules = useMemo(() => {
     return schedules.filter((schedule) => {
       const matchesDirection =
@@ -64,20 +91,21 @@ export default function ScheduleView({ schedules }: ScheduleViewProps) {
             !schedule.startPoint.toLowerCase().includes("iiuc")
           : schedule.startPoint.toLowerCase().includes("university") ||
             schedule.startPoint.toLowerCase().includes("iiuc")
-      const matchesInput = !inputValue || 
+      const matchesInput = !debouncedInputValue || 
         (direction === "to" 
-          ? schedule.startPoint.toLowerCase().includes(inputValue.toLowerCase())
-          : schedule.endPoint.toLowerCase().includes(inputValue.toLowerCase()))
+          ? schedule.startPoint.toLowerCase().includes(debouncedInputValue.toLowerCase())
+          : schedule.endPoint.toLowerCase().includes(debouncedInputValue.toLowerCase()))
       const matchesType = scheduleTypeFilter === "all" || schedule.scheduleType === scheduleTypeFilter
       return matchesDirection && matchesInput && matchesType
     })
-  }, [schedules, direction, inputValue, scheduleTypeFilter])
+  }, [schedules, direction, debouncedInputValue, scheduleTypeFilter])
 
   const clearInput = () => {
     setInputValue("")
     setValidationError("")
     setIsDropdownOpen(false)
-    if (inputRef.current) inputRef.current.focus()
+    setIsInputFocused(true) // Refocus input after clearing
+    inputRef.current?.focus()
   }
 
   const validateSelection = (value: string) => {
@@ -95,23 +123,58 @@ export default function ScheduleView({ schedules }: ScheduleViewProps) {
     setInputValue("")
     setValidationError("")
     setIsDropdownOpen(false)
+    setIsInputFocused(false)
   }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value
     setInputValue(newValue)
-    setIsDropdownOpen(true)
     setValidationError(validateSelection(newValue))
+    setIsDropdownOpen(true)
   }
 
   const handleOptionSelect = (option: string) => {
     setInputValue(option)
     setIsDropdownOpen(false)
+    setIsInputFocused(false) // Unfocus input after selection
     setValidationError(validateSelection(option))
+    inputRef.current?.blur()
+  }
+
+  const handleFocus = () => {
+    setIsInputFocused(true)
+    setIsDropdownOpen(true)
+  }
+
+  const containerVariants = {
+    hidden: { opacity: 0, height: 0 },
+    show: {
+      opacity: 1,
+      height: "auto",
+      transition: { height: { duration: 0.3 }, staggerChildren: 0.05 },
+    },
+    exit: {
+      opacity: 0,
+      height: 0,
+      transition: { height: { duration: 0.2 }, opacity: { duration: 0.1 } },
+    },
+  }
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 10 },
+    show: { opacity: 1, y: 0, transition: { duration: 0.2 } },
+    exit: { opacity: 0, y: -10, transition: { duration: 0.1 } },
   }
 
   const FilterSection = () => (
     <div className="space-y-3 mb-4">
+       <div className="m-0 md:mb-6 hidden md:block ">
+          <div className="flex items-center gap-2 mb-2">
+            <Clock className="h-6 w-6 text-[var(--primary-color)]" />
+            <h1 className="text-2xl font-bold">Bus Schedule</h1>
+          </div>
+          <p className="text-muted-foreground">View all IIUC bus schedules and routes</p>
+        </div>
       {/* Buttons in a row */}
       <div className="flex flex-row gap-2 mb-4">
         <Button
@@ -136,46 +199,69 @@ export default function ScheduleView({ schedules }: ScheduleViewProps) {
       <div className="border rounded-md p-4">
         <h3 className="text-sm font-medium mb-2">Filter</h3>
         <div className="flex flex-col gap-3">
-          <div className="relative">
-            <input
-              ref={inputRef}
-              type="text"
-              value={inputValue}
-              onChange={handleInputChange}
-              onFocus={() => setIsDropdownOpen(true)}
-              onBlur={() => setTimeout(() => setIsDropdownOpen(false), 200)}
-              placeholder={direction === "to" ? "Start Point..." : "End Point..."}
-              className="h-10 text-sm w-full pr-8 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-            />
-            {inputValue && (
-              <button
-                onClick={clearInput}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            )}
-            {isDropdownOpen && (direction === "to" ? startPoints : endPoints).length > 0 && (
-              <div className="absolute z-10 w-full bg-background border rounded-md shadow-lg max-h-48 overflow-auto top-full mt-1">
-                {(direction === "to" ? startPoints : endPoints)
-                  .filter((option) => inputValue ? option.toLowerCase().includes(inputValue.toLowerCase()) : true)
-                  .map((option) => (
-                    <div
-                      key={option}
-                      onMouseDown={() => handleOptionSelect(option)}
-                      className="cursor-pointer hover:bg-accent text-sm py-1.5 px-2"
-                    >
-                      {option}
-                    </div>
-                  ))}
-                {(direction === "to" ? startPoints : endPoints)
-                  .filter((option) => inputValue ? option.toLowerCase().includes(inputValue.toLowerCase()) : true).length === 0 && (
-                  <div className="text-sm text-muted-foreground p-2">
-                    No location found.
-                  </div>
-                )}
-              </div>
-            )}
+          <div ref={filterRef} className="relative">
+            <div className="relative">
+              <Input
+                ref={inputRef}
+                placeholder={direction === "to" ? "Start Point..." : "End Point..."}
+                value={inputValue}
+                onChange={handleInputChange}
+                onFocus={handleFocus}
+                className="h-10 pr-10 pl-3 text-sm rounded-md border border-gray-300 dark:border-gray-700 focus-visible:ring-2 focus-visible:ring-blue-500 dark:focus-visible:ring-blue-400 focus-visible:ring-offset-0"
+              />
+              {inputValue && (
+                <button
+                  onClick={clearInput}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+            <AnimatePresence>
+              {isDropdownOpen && (
+                <motion.div
+                  variants={containerVariants}
+                  initial="hidden"
+                  animate="show"
+                  exit="exit"
+                  className="absolute top-12 w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg shadow-lg mt-2 z-20 max-h-48 overflow-y-auto"
+                >
+                  <motion.ul>
+                    {(direction === "to" ? startPoints : endPoints).length === 0 ? (
+                      <motion.li
+                        variants={itemVariants}
+                        className="px-4 py-2 text-sm text-gray-500 dark:text-gray-400"
+                      >
+                        No locations found
+                      </motion.li>
+                    ) : (
+                      (direction === "to" ? startPoints : endPoints)
+                        .filter((option) =>
+                          debouncedInputValue ? option.toLowerCase().includes(debouncedInputValue.toLowerCase()) : true
+                        )
+                        .map((option) => (
+                          <motion.li
+                            key={option}
+                            variants={itemVariants}
+                            className="px-4 py-2 flex items-center gap-3 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer transition-colors duration-150"
+                            onClick={() => handleOptionSelect(option)}
+                          >
+                            {direction === "to" ? (
+                              <Bus className="h-4 w-4 text-blue-500" />
+                            ) : (
+                              <Check className="h-4 w-4 text-blue-500" />
+                            )}
+                            <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                              {option}
+                            </span>
+                          </motion.li>
+                        ))
+                    )}
+                  </motion.ul>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
           <Select value={scheduleTypeFilter} onValueChange={setScheduleTypeFilter}>
             <SelectTrigger className="h-10 text-sm w-full">
@@ -250,12 +336,9 @@ export default function ScheduleView({ schedules }: ScheduleViewProps) {
   )
 
   const DesktopView = () => (
-    <div className="flex flex-col min-h-screen px-4 space-y-6">
-      {/* Filter Section */}
+    <div className="space-y-6 px-4">
       <FilterSection />
-
-      {/* Table Section */}
-      <div className="flex-1">
+      <div className="rounded-md border">
         <Table>
           <TableHeader>
             <TableRow>
@@ -285,7 +368,7 @@ export default function ScheduleView({ schedules }: ScheduleViewProps) {
   )
 
   return (
-    <div className="container mx-auto py-4">
+    <div className="">
       <div className="block md:hidden">
         <MobileView />
       </div>

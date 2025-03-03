@@ -61,13 +61,13 @@ export default function SupportPage() {
 
   return (
     <div className="container max-w-full mx-auto p-4 md:p-6 mb-20 md:mb-0">
-      <div className="mb-8 hidden md:block">
-        <h1 className="text-3xl font-bold text-[var(--primary-color)] flex items-center gap-2">
-          <MessageCircle className="h-8 w-8" />
-          Support
-        </h1>
-        <p className="text-muted-foreground mt-2">Contact information for emergency</p>
-      </div>
+      <div className="m-0 md:mb-6 hidden md:block ">
+          <div className="flex items-center gap-2 mb-2">
+            <MessageCircle className="h-6 w-6 text-[var(--primary-color)]" />
+            <h1 className="text-2xl font-bold">Support</h1>
+          </div>
+          <p className="text-muted-foreground">Contact information for emergency</p>
+        </div>
 
       <div className="space-y-6">
         <Card>
