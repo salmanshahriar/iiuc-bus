@@ -43,7 +43,7 @@ export function BottomNav() {
     <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-gray-950">
       <div className="relative">
         {/* Solid background */}
-        <div className="absolute inset-0 bg-background border-t border-border/50" />
+        <div className="absolute inset-0 bg-background border-t" />
         
         {/* Main Navigation Content */}
         <div className="relative">

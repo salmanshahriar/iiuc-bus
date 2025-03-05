@@ -123,12 +123,12 @@ export function BusSearch({ onSearch, currentDateTime, userLogin }: BusSearchPro
   }
 
   return (
-    <div className="space-y-4 p-6 bg-background/60 backdrop-blur-2xl rounded-2xl border border-border/50 shadow-lg">
-      <div className="grid gap-4">
+    <div className="space-y-5 p-6 glass-effect rounded-xl border shadow-lg premium-wide-shadow">
+      <div className="grid gap-5">
         {/* From */}
         <div ref={fromRef} className="relative" onBlur={handleFromBlur}>
-          <label className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground/80 mb-1">
-            <Navigation className="h-3.5 w-3.5" /> From
+          <label className="flex items-center gap-1.5 text-sm font-medium text-foreground mb-1.5">
+            <Navigation className="h-4 w-4 text-primary" /> From
           </label>
           <div className="relative">
             <Input
@@ -139,12 +139,12 @@ export function BusSearch({ onSearch, currentDateTime, userLogin }: BusSearchPro
                 setValidationError(validateSelection(e.target.value, to))
               }}
               onFocus={() => setFromFocused(true)}
-              className="h-12 pr-10 pl-3 text-sm rounded-xl border border-gray-300 dark:border-gray-700 focus-visible:ring-2 focus-visible:ring-blue-500 dark:focus-visible:ring-blue-400 focus-visible:ring-offset-0 bg-background/60"
+              className="h-12 pr-10 pl-4 text-sm rounded-xl border border-border/80 bg-background/50 text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-0"
             />
             {from && (
               <button
                 onClick={() => clearInput("from")}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -157,13 +157,13 @@ export function BusSearch({ onSearch, currentDateTime, userLogin }: BusSearchPro
                 initial="hidden"
                 animate="show"
                 exit="exit"
-                className="absolute top-20 w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg shadow-lg mt-2 z-20 max-h-64 overflow-y-auto"
+                className="absolute top-20 w-full glass-effect rounded-lg shadow-lg mt-2 z-20 max-h-64 overflow-y-auto"
               >
                 <motion.ul>
                   {startPoints.length === 0 ? (
                     <motion.li
                       variants={itemVariants}
-                      className="px-4 py-2 text-sm text-gray-500 dark:text-gray-400"
+                      className="px-4 py-2 text-sm text-muted-foreground"
                     >
                       No locations found
                     </motion.li>
@@ -176,22 +176,20 @@ export function BusSearch({ onSearch, currentDateTime, userLogin }: BusSearchPro
                         <motion.li
                           key={point}
                           variants={itemVariants}
-                          className="px-4 py-2 flex items-center gap-3 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer transition-colors duration-150"
+                          className="px-4 py-2 flex items-center gap-3 hover:bg-primary/10 cursor-pointer transition-colors duration-150"
                           onClick={() => {
                             setFrom(point)
                             setFromFocused(false)
                             setValidationError(validateSelection(point, to))
                           }}
                         >
-                          <Navigation className="h-4 w-4 text-blue-500" />
-                          <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                            {point}
-                          </span>
+                          <Navigation className="h-4 w-4 text-primary" />
+                          <span className="text-sm font-medium text-foreground">{point}</span>
                         </motion.li>
                       ))
                   )}
                 </motion.ul>
-                <div className="px-4 py-2 border-t border-gray-200 dark:border-gray-800 text-xs text-gray-500 dark:text-gray-400">
+                <div className="px-4 py-2 border-t border-border/50 text-xs text-muted-foreground">
                   Select a starting point
                 </div>
               </motion.div>
@@ -201,8 +199,8 @@ export function BusSearch({ onSearch, currentDateTime, userLogin }: BusSearchPro
 
         {/* To */}
         <div ref={toRef} className="relative" onBlur={handleToBlur}>
-          <label className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground/80 mb-1">
-            <MapPin className="h-3.5 w-3.5" /> To
+          <label className="flex items-center gap-1.5 text-sm font-medium text-foreground mb-1.5">
+            <MapPin className="h-4 w-4 text-primary" /> To
           </label>
           <div className="relative">
             <Input
@@ -213,12 +211,12 @@ export function BusSearch({ onSearch, currentDateTime, userLogin }: BusSearchPro
                 setValidationError(validateSelection(from, e.target.value))
               }}
               onFocus={() => setToFocused(true)}
-              className="h-12 pr-10 pl-3 text-sm rounded-xl border border-gray-300 dark:border-gray-700 focus-visible:ring-2 focus-visible:ring-blue-500 dark:focus-visible:ring-blue-400 focus-visible:ring-offset-0 bg-background/60"
+              className="h-12 pr-10 pl-4 text-sm rounded-xl border border-border/80 bg-background/50 text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-0"
             />
             {to && (
               <button
                 onClick={() => clearInput("to")}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -231,13 +229,13 @@ export function BusSearch({ onSearch, currentDateTime, userLogin }: BusSearchPro
                 initial="hidden"
                 animate="show"
                 exit="exit"
-                className="absolute top-20 w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg shadow-lg mt-2 z-20 max-h-64 overflow-y-auto"
+                className="absolute top-20 w-full glass-effect rounded-lg shadow-lg mt-2 z-20 max-h-64 overflow-y-auto"
               >
                 <motion.ul>
                   {endPoints.length === 0 ? (
                     <motion.li
                       variants={itemVariants}
-                      className="px-4 py-2 text-sm text-gray-500 dark:text-gray-400"
+                      className="px-4 py-2 text-sm text-muted-foreground"
                     >
                       No locations found
                     </motion.li>
@@ -250,22 +248,20 @@ export function BusSearch({ onSearch, currentDateTime, userLogin }: BusSearchPro
                         <motion.li
                           key={point}
                           variants={itemVariants}
-                          className="px-4 py-2 flex items-center gap-3 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer transition-colors duration-150"
+                          className="px-4 py-2 flex items-center gap-3 hover:bg-primary/10 cursor-pointer transition-colors duration-150"
                           onClick={() => {
                             setTo(point)
                             setToFocused(false)
                             setValidationError(validateSelection(from, point))
                           }}
                         >
-                          <MapPin className="h-4 w-4 text-blue-500" />
-                          <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                            {point}
-                          </span>
+                          <MapPin className="h-4 w-4 text-primary" />
+                          <span className="text-sm font-medium text-foreground">{point}</span>
                         </motion.li>
                       ))
                   )}
                 </motion.ul>
-                <div className="px-4 py-2 border-t border-gray-200 dark:border-gray-800 text-xs text-gray-500 dark:text-gray-400">
+                <div className="px-4 py-2 border-t border-border/50 text-xs text-muted-foreground">
                   Select a destination
                 </div>
               </motion.div>
@@ -280,7 +276,7 @@ export function BusSearch({ onSearch, currentDateTime, userLogin }: BusSearchPro
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="flex items-center gap-2 text-sm text-destructive p-4 rounded-xl bg-destructive/10"
+              className="flex items-center gap-2 text-sm text-destructive p-4 rounded-xl bg-destructive/10 border border-destructive/20"
             >
               <AlertCircle className="h-4 w-4" />
               {validationError}
@@ -289,9 +285,9 @@ export function BusSearch({ onSearch, currentDateTime, userLogin }: BusSearchPro
         </AnimatePresence>
 
         {/* Date */}
-        <div className="space-y-1">
-          <label className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground/80">
-            <Clock className="h-3.5 w-3.5" /> Date
+        <div className="space-y-1.5">
+          <label className="flex items-center gap-1.5 text-sm font-medium text-foreground">
+            <Clock className="h-4 w-4 text-primary" /> Date
           </label>
           <DatePicker
             date={date}
@@ -306,13 +302,13 @@ export function BusSearch({ onSearch, currentDateTime, userLogin }: BusSearchPro
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
-              className="w-full h-12 rounded-xl bg-gradient-to-r from-[var(--gradient-from)] to-[var(--gradient-to)] text-sm"
+              className="w-full h-12 rounded-xl bg-gradient-to-r from-[var(--gradient-from)] to-[var(--gradient-to)] text-primary-foreground text-sm font-medium hover:brightness-110 transition-all duration-200"
               onClick={handleSearch}
               disabled={isSearching || !from || !to || !!validationError}
             >
               {isSearching ? (
                 <div className="flex items-center gap-2">
-                  <div className="w-5 h-5 border-2 border-t-transparent rounded-full animate-spin" />
+                  <div className="w-5 h-5 border-2 border-t-transparent border-primary-foreground rounded-full animate-spin" />
                   Searching...
                 </div>
               ) : (
@@ -322,21 +318,21 @@ export function BusSearch({ onSearch, currentDateTime, userLogin }: BusSearchPro
               )}
             </Button>
           </TooltipTrigger>
-          <TooltipContent>
+          <TooltipContent className="bg-muted text-foreground">
             {!from || !to ? "Select both locations" : validationError ? validationError : "Search available buses"}
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
 
       {/* Footer */}
-      <div className="pt-4 flex justify-between text-xs text-muted-foreground/60 border-t border-border/40">
+      <div className="hidden pt-4 md:flex justify-between text-xs text-muted-foreground border-t border-border/50">
         <div className="flex items-center gap-1.5">
-          <Clock className="h-3.5 w-3.5" />
-          Updated: {format(new Date(currentDateTime), "HH:mm:ss")}
+          <Clock className="h-3.5 w-3.5 text-primary" />
+          Beta 0.1
         </div>
         <div className="flex items-center gap-1.5">
-          <User className="h-3.5 w-3.5" />
-          {userLogin}
+          <User className="h-3.5 w-3.5 text-primary" />
+          user
         </div>
       </div>
     </div>

@@ -35,7 +35,7 @@ export function SideNav() {
         "transition-all duration-300 ease-in-out",
         "hidden md:block",
         isExpanded ? "w-48" : "w-20",
-        "bg-background border-r border-border/50",
+        "bg-background border-r",
         "hover:shadow-lg hover:shadow-primary/5"
       )}
     >
@@ -53,16 +53,16 @@ export function SideNav() {
                       "flex items-center justify-start h-12 px-3",
                       "hover:bg-primary/10 active:scale-[0.98] transition-all",
                       !isExpanded && "justify-center",
-                      isActive && "bg-primary/15 text-primary hover:bg-primary/20"
+                      isActive && "bg-primary/15 hover:bg-primary/20"
                     )}
                   >
                     <div className={cn(
                       "flex items-center",
-                      isActive && "text-primary"
+                      isActive 
                     )}>
                       <item.icon className={cn(
                         "h-5 w-5 transition-transform duration-200",
-                        !isActive && "text-muted-foreground group-hover:text-primary/80",
+                        !isActive && "text-muted-foreground",
                         "group-hover:scale-110"
                       )} />
                       {isExpanded && (
@@ -92,7 +92,7 @@ export function SideNav() {
           </div>
         </div>
 
-        <div className="p-3 border-t border-border/50">
+        <div className="p-3 border-t">
           <Button
             variant="ghost"
             onClick={() => setIsExpanded(prev => !prev)}

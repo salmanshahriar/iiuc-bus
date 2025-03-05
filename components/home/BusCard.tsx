@@ -58,15 +58,15 @@ export function BusCard({ bus, className }: BusCardProps) {
 
   return (
     <motion.div variants={cardVariants} initial="hidden" animate="visible" whileHover="hover">
-      <Card className={cn("overflow-hidden hover:shadow-lg bg-card relative", className)}>
+      <Card className={cn("overflow-hidden glass-effect card-hover-effect", className)}>
         {bus.gender && (
           <Badge
             variant="secondary"
             className={cn(
               "absolute top-4 right-4 text-xs font-semibold px-3 py-1 rounded-full",
               bus.gender.toLowerCase() === "male"
-                ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
-                : "bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-200"
+                ? "bg-primary/20 text-primary dark:bg-primary/30 dark:text-primary-foreground"
+                : "bg-secondary/40 text-foreground dark:bg-secondary dark:text-foreground"
             )}
           >
             <Users className="w-3 h-3 mr-1 inline-block" />
@@ -74,110 +74,112 @@ export function BusCard({ bus, className }: BusCardProps) {
           </Badge>
         )}
 
-        <CardContent className="p-4">
+        <CardContent className="p-5">
           <div className="flex items-center mb-4">
-            <div className="bg-primary/10 text-primary p-2 rounded-xl mr-3">
+            <div className="bg-primary/20 text-primary p-2 rounded-xl mr-3">
               <Bus className="h-6 w-6" />
             </div>
             <div>
-              <h3 className="text-lg font-bold">Bus {bus.busNo}</h3>
+              <h3 className="text-lg font-semibold text-foreground">Bus {bus.busNo}</h3>
               <p className="text-sm font-medium text-primary">{bus.busType}</p>
             </div>
           </div>
 
-          <div className="space-y-2 text-sm">
+          <div className="space-y-3 text-sm text-muted-foreground">
             <div className="flex items-center">
-              <MapPin className="h-4 w-4 text-muted-foreground mr-2" />
+              <MapPin className="h-4 w-4 mr-2 text-primary" />
               {bus.routeName}
             </div>
             <div className="flex items-center">
-              <Clock className="h-4 w-4 text-muted-foreground mr-2" />
+              <Clock className="h-4 w-4 mr-2 text-primary" />
               {formattedTime}
             </div>
             <div className="flex items-center">
-              <Calendar className="h-4 w-4 text-muted-foreground mr-2" />
+              <Calendar className="h-4 w-4 mr-2 text-primary" />
               {bus.scheduleDate}
             </div>
           </div>
         </CardContent>
 
-        <CardFooter className="p-4 pt-0 flex justify-between gap-2">
+        <CardFooter className="p-5 pt-0 flex justify-between gap-2">
           <Dialog>
             <DialogTrigger asChild>
-              <Button variant="outline" size="sm" className="text-xs font-medium flex-1">
+              <Button variant="outline" size="sm" className="text-xs font-medium flex-1 border-primary/40 hover:bg-primary/10 text-foreground">
                 More Info
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent className="sm:max-w-[425px] glass-effect">
               <DialogHeader>
-                <DialogTitle>Bus Information</DialogTitle>
-                <DialogDescription>Details for Bus No: {bus.busNo}</DialogDescription>
+                <DialogTitle className="text-foreground">Bus Information</DialogTitle>
+                <DialogDescription className="text-muted-foreground">
+                  Details for Bus No: {bus.busNo}
+                </DialogDescription>
               </DialogHeader>
               <div className="grid gap-4 py-4">
                 <div className="space-y-2">
-                  <h4 className="font-semibold">Route Information</h4>
-                  <p className="text-sm">
+                  <h4 className="font-semibold text-foreground">Route Information</h4>
+                  <p className="text-sm text-muted-foreground">
                     <strong>Route:</strong> {bus.routeName}
                   </p>
-                  <p className="text-sm">
+                  <p className="text-sm text-muted-foreground">
                     <strong>Start:</strong> {bus.startPoint}
                   </p>
-                  <p className="text-sm">
+                  <p className="text-sm text-muted-foreground">
                     <strong>End:</strong> {bus.endPoint}
                   </p>
-                  <p className="text-sm">
+                  <p className="text-sm text-muted-foreground">
                     <strong>Date:</strong> {bus.scheduleDate}
                   </p>
-                  <p className="text-sm">
+                  <p className="text-sm text-muted-foreground">
                     <strong>Time:</strong> {formattedTime}
                   </p>
                 </div>
-                <Separator />
+                <Separator className="bg-border/50" />
                 <div className="space-y-2">
-                  <h4 className="font-semibold">Vehicle Information</h4>
-                  <p className="text-sm">
+                  <h4 className="font-semibold text-foreground">Vehicle Information</h4>
+                  <p className="text-sm text-muted-foreground">
                     <strong>Vehicle ID:</strong> {bus.vehicleId}
                   </p>
-                  <p className="text-sm">
+                  <p className="text-sm text-muted-foreground">
                     <strong>Capacity:</strong> {bus.capacity}
                   </p>
                   {bus.gender && (
-                    <p className="text-sm">
+                    <p className="text-sm text-muted-foreground">
                       <strong>Gender:</strong> {bus.gender}
                     </p>
                   )}
                 </div>
-                <Separator />
+                <Separator className="bg-border/50" />
                 <div className="space-y-2">
-                  <h4 className="font-semibold">Staff Information</h4>
+                  <h4 className="font-semibold text-foreground">Staff Information</h4>
                   <div className="grid grid-cols-2 gap-2">
                     <div>
-                      <p className="text-sm font-medium">Driver</p>
-                      <p className="text-sm flex items-center">
-                        <Users className="h-3 w-3 mr-1" /> {bus.driverName}
+                      <p className="text-sm font-medium text-foreground">Driver</p>
+                      <p className="text-sm text-muted-foreground flex items-center">
+                        <Users className="h-3 w-3 mr-1 text-primary" /> {bus.driverName}
                       </p>
-                      <p className="text-sm flex items-center">
-                        <Phone className="h-3 w-3 mr-1" /> {bus.driverPhone}
+                      <p className="text-sm text-muted-foreground flex items-center">
+                        <Phone className="h-3 w-3 mr-1 text-primary" /> {bus.driverPhone}
                       </p>
                     </div>
                     <div>
-                      <p className="text-sm font-medium">Helper</p>
-                      <p className="text-sm flex items-center">
-                        <Users className="h-3 w-3 mr-1" /> {bus.helperName}
+                      <p className="text-sm font-medium text-foreground">Helper</p>
+                      <p className="text-sm text-muted-foreground flex items-center">
+                        <Users className="h-3 w-3 mr-1 text-primary" /> {bus.helperName}
                       </p>
-                      <p className="text-sm flex items-center">
-                        <Phone className="h-3 w-3 mr-1" /> {bus.helperPhone}
+                      <p className="text-sm text-muted-foreground flex items-center">
+                        <Phone className="h-3 w-3 mr-1 text-primary" /> {bus.helperPhone}
                       </p>
                     </div>
                   </div>
                 </div>
                 {bus.additionalInfo && (
                   <>
-                    <Separator />
+                    <Separator className="bg-border/50" />
                     <div className="space-y-2">
-                      <h4 className="font-semibold">Additional Info</h4>
-                      <p className="text-sm flex items-start">
-                        <Info className="h-4 w-4 mr-2 mt-0.5" /> {bus.additionalInfo}
+                      <h4 className="font-semibold text-foreground">Additional Info</h4>
+                      <p className="text-sm text-muted-foreground flex items-start">
+                        <Info className="h-4 w-4 mr-2 text-primary mt-0.5" /> {bus.additionalInfo}
                       </p>
                     </div>
                   </>
@@ -185,7 +187,10 @@ export function BusCard({ bus, className }: BusCardProps) {
               </div>
             </DialogContent>
           </Dialog>
-          <Button size="sm" className="text-xs font-medium flex-1">
+          <Button 
+            size="sm" 
+            className="text-xs font-medium flex-1 bg-gradient-to-r from-[var(--gradient-from)] to-[var(--gradient-to)] text-primary-foreground hover:brightness-110"
+          >
             <Link href={`/track?bus=${bus.busNo}`} className="w-full">
               Live Track
             </Link>

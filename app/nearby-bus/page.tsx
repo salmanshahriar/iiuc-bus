@@ -134,17 +134,24 @@ export default function NearbyBus() {
   const InfoContent = () => (
     <div className="flex flex-col h-full w-full">
       <div className="px-3 py-2 bg-background/50 backdrop-blur-xl border-b border-border/50 flex justify-between items-center shrink-0">
-        <div className="w-full">
-          <h2 className="text-base font-semibold leading-tight truncate">
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-[var(--gradient-from)] via-[var(--gradient-via)] to-[var(--gradient-to)] animate-gradient">
-              Nearby Buses
+      <div className="w-full">
+        <h2 className="text-base font-semibold leading-tight truncate">
+          <span className="bg-clip-text text-transparent bg-gradient-to-r from-[var(--gradient-from)] via-[var(--gradient-via)] to-[var(--gradient-to)] animate-gradient">
+            Nearby Buses
+          </span>
+        </h2>
+        <p className="text-xs text-muted-foreground truncate">
+          {isLoading ? (
+            <span className="inline-flex items-center">
+              Refreshing
+              <span className="animate-[pulse_0.3s_ease-in-out_infinite] ml-1">...</span>
             </span>
-          </h2>
-          <p className="text-xs text-muted-foreground truncate">
-            {isLoading ? `Refreshing...` : `${nearbyBuses.length} buses found`}
-          </p>
-        </div>
+          ) : (
+            `${nearbyBuses.length} buses found`
+          )}
+        </p>
       </div>
+    </div>
       <div className="flex-1 overflow-y-auto p-2 space-y-2">
         {isLoading ? (
           <div className="space-y-3">
@@ -206,7 +213,7 @@ export default function NearbyBus() {
               />
             </ErrorBoundary>
           </div>
-          <div className="absolute top-4 left-4 z-50 md:hidden">
+          <div className="absolute top-4 left-4 z-10 md:hidden">
             <Sheet open={isInfoOpen} onOpenChange={setIsInfoOpen}>
               <SheetTrigger asChild>
                 <Button
@@ -232,22 +239,7 @@ export default function NearbyBus() {
               </SheetContent>
             </Sheet>
           </div>
-          <div className="absolute bottom-4 right-4 z-[9999]">
-            <Button
-              size="sm"
-              variant="secondary"
-              className="bg-background/95 backdrop-blur-sm shadow-lg 
-                border border-primary/20 hover:border-primary/40
-                hover:shadow-xl transition-all duration-200
-                flex items-center gap-2"
-              onClick={() => {
-                setSelectedBus(null);
-                setTrackSelectedBus(false);
-              }}
-            >
-              <MapPin className="h-4 w-4 text-primary" />
-            </Button>
-          </div>
+          
         </div>
 
         <div className="hidden lg:block w-[300px] h-full border-l bg-background/80 backdrop-blur-sm shrink-0">

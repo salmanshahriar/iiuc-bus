@@ -54,9 +54,6 @@ export default function Home() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [showResults, setShowResults] = useState(false)
 
-  const currentDateTime = "2025-02-09 14:39:11" // This could be dynamic
-  const userLogin = "user"
-
   const fetchLiveBusSchedules = async (params: { from: string; to: string; date: string }) => {
     setIsLoading(true)
     setErrorMessage(null)
@@ -99,14 +96,14 @@ export default function Home() {
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex-shrink-0 px-4 py-6 sm:px-6 sm:py-6 bg-background/60 backdrop-blur-2xl border-b border-border/40"
+        className="flex-shrink-0 px-4 py-6 sm:px-6 sm:py-6 glass-effect border-b "
       >
-        <h2 className="text-xl sm:text-2xl font-semibold tracking-tight">
+        <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
           <span className="bg-clip-text text-transparent bg-gradient-to-r from-[var(--gradient-from)] via-[var(--gradient-via)] to-[var(--gradient-to)] animate-gradient">
             Available Buses
           </span>
         </h2>
-        <p className="text-sm text-muted-foreground/90 mt-2">
+        <p className="text-sm text-muted-foreground mt-2">
           {isLoading
             ? "Searching for buses..."
             : errorMessage
@@ -115,14 +112,14 @@ export default function Home() {
         </p>
       </motion.div>
 
-      <div className="flex-1 overflow-y-auto px-4 py-6 sm:px-6">
+      <div className="flex-1 overflow-y-auto px-4 py-6 sm:px-6 bg-background">
         {isLoading ? (
           <div className="flex justify-center items-center py-12">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
           </div>
         ) : errorMessage ? (
           <div className="flex flex-col items-center justify-center py-12 text-center">
-            <Bus className="h-10 w-10 text-muted-foreground/50 mb-4" />
+            <Bus className="h-10 w-10 text-muted-foreground mb-4" />
             <p className="text-sm font-medium text-muted-foreground">{errorMessage}</p>
             <p className="text-sm text-muted-foreground/80 mt-2">Try a different route or date</p>
           </div>
@@ -134,7 +131,7 @@ export default function Home() {
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center py-12 text-center">
-            <Bus className="h-10 w-10 text-muted-foreground/50 mb-4" />
+            <Bus className="h-10 w-10 text-muted-foreground mb-4" />
             <p className="text-sm font-medium text-muted-foreground">No buses found</p>
             <p className="text-sm text-muted-foreground/80 mt-2">Try adjusting your search</p>
           </div>
@@ -150,31 +147,31 @@ export default function Home() {
       exit={{ opacity: 0 }}
       className="h-[calc(100vh-4rem)] flex flex-col"
     >
-      <div className="px-6 py-8 lg:px-8 bg-background/60 backdrop-blur-2xl border-b border-border/40">
-        <h2 className="text-2xl font-semibold tracking-tight">
+      <div className="px-6 py-8 lg:px-8 border-b">
+        <h2 className="text-2xl font-bold tracking-tight text-foreground">
           <span className="bg-clip-text text-transparent bg-gradient-to-r from-[var(--gradient-from)] via-[var(--gradient-via)] to-[var(--gradient-to)] animate-gradient">
             Features
           </span>
         </h2>
-        <p className="text-sm text-muted-foreground/90 mt-2">Tools for tracking your bus</p>
+        <p className="text-sm text-muted-foreground mt-2">Tools for tracking your bus</p>
       </div>
 
-      <div className="flex-1 grid grid-cols-1 content-center gap-4 p-6 lg:p-8">
+      <div className="flex-1 grid grid-cols-1 content-center gap-4 p-6 lg:p-8 bg-background">
         {features.map((feature, index) => (
           <motion.div
             key={index}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 }}
-            className="group relative bg-background/40 backdrop-blur-2xl rounded-2xl border border-border/40 hover:border-primary/30 transition-all duration-500 ease-out"
+            className="group relative border hover:border-primary/40 rounded-md transition-all duration-300 card-hover-effect"
           >
             <div className="p-5 flex items-start gap-4">
-              <div className="shrink-0 p-4 rounded-xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-border/40">
+              <div className="shrink-0 p-6 rounded-xl border border-primary/50 bg-primary/15">
                 {feature.icon}
               </div>
               <div className="space-y-1.5">
-                <h3 className="font-semibold text-base tracking-tight">{feature.title}</h3>
-                <p className="text-sm text-muted-foreground/90 leading-relaxed">{feature.description}</p>
+                <h3 className="font-semibold text-base tracking-tight text-foreground">{feature.title}</h3>
+                <p className="text-xs text-muted-foreground leading-relaxed">{feature.description}</p>
               </div>
             </div>
           </motion.div>
@@ -184,20 +181,20 @@ export default function Home() {
   )
 
   return (
-    <div className="md:h-[calc(100vh-4rem)] bg-gradient-to-br from-background via-background/95 to-background dark:bg-gray-950">
+    <div className="md:h-[calc(100vh-4rem)] bg-background">
       {/* Mobile View */}
-      <div className="block md:hidden overflow-auto">
+      <div className="block md:hidden overflow-auto bg-background h-[calc(100vh-4rem)]">
         <div className="p-4 space-y-6">
           <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center">
-            <h1 className="text-3xl font-bold mt-4 mb-2 tracking-tight">
+            <h1 className="text-3xl font-bold mt-4 mb-2 tracking-tight text-foreground">
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-[var(--gradient-from)] via-[var(--gradient-via)] to-[var(--gradient-to)] animate-gradient">
                 IIUC Bus Tracker
               </span>
             </h1>
-            <p className="text-sm text-muted-foreground/80">Real-time university bus tracking</p>
+            <p className="text-sm text-muted-foreground">Real-time university bus tracking</p>
           </motion.section>
 
-          <BusSearch onSearch={fetchLiveBusSchedules} currentDateTime={currentDateTime} userLogin={userLogin} />
+          <BusSearch onSearch={fetchLiveBusSchedules} />
 
           <AnimatePresence mode="wait">
             {showResults && (
@@ -210,25 +207,25 @@ export default function Home() {
       </div>
 
       {/* Desktop View */}
-      <div className="hidden md:flex h-full overflow-hidden">
-        <div className="flex-1 flex items-center justify-center px-16">
+      <div className="hidden md:flex h-full overflow-hidden bg-background">
+        <div className="flex-1 flex items-center justify-center px-16 bg-background">
           <div className="w-full max-w-2xl">
             <div className="text-center mb-12">
-              <h1 className="text-6xl font-bold leading-tight tracking-tight mb-4">
+              <h1 className="text-5xl font-bold leading-tight tracking-tight text-foreground mb-4">
                 <span className="bg-clip-text text-transparent bg-gradient-to-r from-[var(--gradient-from)] via-[var(--gradient-via)] to-[var(--gradient-to)] animate-gradient">
                   IIUC BUS TRACKER
                 </span>
               </h1>
-              <p className="text-xl text-muted-foreground/80 font-light">
+              <p className="text-lg text-muted-foreground font-medium">
                 Real-time tracking for IIUC buses
               </p>
             </div>
 
-            <BusSearch onSearch={fetchLiveBusSchedules} currentDateTime={currentDateTime} userLogin={userLogin} />
+            <BusSearch onSearch={fetchLiveBusSchedules} />
           </div>
         </div>
 
-        <div className="w-[440px] h-full border-l border-border/40">
+        <div className="w-[440px] h-full border-l bg-background">
           <AnimatePresence mode="wait">
             {!showResults ? (
               <FeaturesList />

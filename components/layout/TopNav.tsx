@@ -149,16 +149,16 @@ export function TopNav() {
   const unreadCount = notifications.filter((n) => !n.isRead).length
 
   return (
-    <div className="fixed left-0 right-0 top-0 h-16 bg-background border-b border-border/50 z-50">
+    <div className="fixed left-0 right-0 top-0 h-16 bg-background border-b z-50">
       <div className="flex items-center justify-between px-4 h-full mx-auto">
         <Link href="/" className="flex items-center">
-          <img src="/icon-logo.png" alt="IIUC Logo" className="h-8 w-8 rounded-xl" />
-          <span className="ml-3 text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[var(--gradient-from)] to-[var(--gradient-to)]">
-            IIUC<span className="text-primary">BUS</span>
+          {/* <img src="/icon-logo.png" alt="IIUC Logo" className="h-8 w-8 rounded-xl" /> */}
+          <span className="ml-3 text-xl font-bold ">
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-[var(--gradient-from)] to-[var(--gradient-to)]">IIUC </span>BUS
           </span>
         </Link>
         <div className="flex items-center space-x-6">
-          {/* <ModeToggle /> */}
+         
           <Popover open={isNotificationOpen} onOpenChange={setIsNotificationOpen}>
             <PopoverTrigger asChild>
               <Button variant="ghost" size="icon" className="relative">
@@ -179,6 +179,7 @@ export function TopNav() {
               />
             </PopoverContent>
           </Popover>
+          <div className="hidden md:block"><ModeToggle /></div>
           <button
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}

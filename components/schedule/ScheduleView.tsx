@@ -179,7 +179,7 @@ export default function ScheduleView({ schedules }: ScheduleViewProps) {
       <div className="flex flex-row gap-2 mb-4">
         <Button
           variant="secondary"
-          className={`flex-1 h-12 text-sm bg-[#2c3e50] text-white hover:bg-[#34495e] rounded-lg flex items-center justify-center gap-2 ${direction === "to" ? "ring-2 ring-primary" : ""}`}
+          className={`flex-1 h-12 text-sm bg-[#303035] hover:bg-primary/80 text-white rounded-lg flex items-center justify-center gap-2 ${direction === "to" ? " bg-primary" : ""}`}
           onClick={() => handleDirectionChange("to")}
         >
           <Bus className="h-5 w-5" />
@@ -187,7 +187,7 @@ export default function ScheduleView({ schedules }: ScheduleViewProps) {
         </Button>
         <Button
           variant="secondary"
-          className={`flex-1 h-12 text-sm bg-[#2c3e50] text-white hover:bg-[#34495e] rounded-lg flex items-center justify-center gap-2 ${direction === "from" ? "ring-2 ring-primary" : ""}`}
+          className={`flex-1 h-12 text-sm bg-[#303035] hover:bg-primary/80 text-white rounded-lg flex items-center justify-center gap-2 ${direction === "from" ? " bg-primary" : ""}`}
           onClick={() => handleDirectionChange("from")}
         >
           <Check className="h-5 w-5" />
@@ -225,7 +225,7 @@ export default function ScheduleView({ schedules }: ScheduleViewProps) {
                   initial="hidden"
                   animate="show"
                   exit="exit"
-                  className="absolute top-12 w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg shadow-lg mt-2 z-20 max-h-48 overflow-y-auto"
+                  className="absolute top-12 w-full bg-white dark:bg-[#111113] border border-gray-200 dark:border-gray-800 rounded-lg shadow-lg mt-2 z-20 max-h-48 overflow-y-auto"
                 >
                   <motion.ul>
                     {(direction === "to" ? startPoints : endPoints).length === 0 ? (
@@ -244,15 +244,15 @@ export default function ScheduleView({ schedules }: ScheduleViewProps) {
                           <motion.li
                             key={option}
                             variants={itemVariants}
-                            className="px-4 py-2 flex items-center gap-3 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer transition-colors duration-150"
+                            className="px-4 py-2 flex items-center gap-3 cursor-pointer transition-colors duration-150"
                             onClick={() => handleOptionSelect(option)}
                           >
                             {direction === "to" ? (
-                              <Bus className="h-4 w-4 text-blue-500" />
+                              <Bus className="h-4 w-4 text-primary " />
                             ) : (
-                              <Check className="h-4 w-4 text-blue-500" />
+                              <Check className="h-4 w-4 text-primary" />
                             )}
-                            <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                            <span className="text-sm font-medium">
                               {option}
                             </span>
                           </motion.li>
