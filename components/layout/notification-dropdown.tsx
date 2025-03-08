@@ -23,6 +23,8 @@ export default function NotificationDropdown({
   markAsRead,
   onClose,
 }: NotificationDropdownProps) {
+  console.log("Notifications in dropdown:", notifications) // Debug: Check what’s received
+
   const handleClick = async (id: string, isRead: boolean) => {
     if (!isRead) await markAsRead(id)
     onClose()
@@ -54,13 +56,13 @@ export default function NotificationDropdown({
                 {unreadNotifications.map((notification) => (
                   <div
                     key={notification.id}
-                    className="p-4 border-b last:border-0 hover:bg-muted/50 cursor-pointer bg-blue-50 transition-colors"
+                    className="p-4 border-b last:border-0 hover:bg-muted/50 cursor-pointer transition-colors"
                     onClick={() => handleClick(notification.id, notification.isRead)}
                   >
                     <div className="flex items-start gap-3">
-                      <div className="mt-1.5 h-2 w-2 rounded-full bg-blue-500 flex-shrink-0" />
+                      <div className="mt-1.5 h-2 w-2 rounded-full bg-primary  flex-shrink-0" />
                       <div>
-                        <p className="font-medium text-sm text-blue-700">{notification.title}</p>
+                        <p className="font-medium text-sm text-black dark:text-white">{notification.title}</p>
                         <p className="text-xs text-muted-foreground mt-1">{notification.message}</p>
                         <p className="text-xs text-muted-foreground mt-1">
                           {formatTime(notification.createdAt)}

@@ -8,7 +8,6 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import NotificationDropdown from "./notification-dropdown"
 import { ModeToggle } from "./ModeToggle"
 import { ProfileSidebar } from "./ProfileSidebar"
-import { useUser } from "@/contexts/UserContext"
 import { cn } from "@/lib/utils"
 
 interface Notification {
@@ -25,9 +24,6 @@ export function TopNav() {
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [loading, setLoading] = useState(true)
   const [isHovered, setIsHovered] = useState(false)
-
-  const { user } = useUser()
-  const token = user?.token // Adjust based on your UserContext
 
   // Local storage helpers
   const getReadNotifications = (): Notification[] => {
@@ -50,16 +46,27 @@ export function TopNav() {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/admin/notification`, {
         headers: {
           "Content-Type": "application/json",
-          // ...(token ? { "Authorization": `Bearer ${token}` } : {}),
         },
       })
       if (!response.ok) {
         throw new Error(`Failed to fetch notifications: ${response.status}`)
       }
       const result = await response.json()
-      const unreadNotifications = Array.isArray(result.data)
-        ? result.data.filter((n: Notification) => !readIds.has(n.id))
+      console.log("API Response:", result) // Debug: Check the response
+
+      // Map API response to Notification interface
+      const unreadNotifications = Array.isArray(result.notifications)
+        ? result.notifications
+            .map((n: any) => ({
+              id: n.id,
+              title: n.title,
+              message: n.message,
+              isRead: n.isRead,
+              createdAt: n.createdAt,
+            }))
+            .filter((n: Notification) => !readIds.has(n.id))
         : []
+      console.log("Unread Notifications:", unreadNotifications) // Debug: Check filtered unread
 
       const sortedRead = readNotifications
         .sort((a: Notification, b: Notification) =>
@@ -67,6 +74,7 @@ export function TopNav() {
         )
         .slice(0, 10)
       const combinedNotifications = [...unreadNotifications, ...sortedRead]
+      console.log("Combined Notifications:", combinedNotifications) // Debug: Final array
 
       setNotifications(combinedNotifications)
       localStorage.setItem("notifications", JSON.stringify(combinedNotifications))
@@ -76,7 +84,7 @@ export function TopNav() {
     } finally {
       setLoading(false)
     }
-  }, [token])
+  }, [])
 
   // Mark a notification as read
   const markAsRead = useCallback(
@@ -95,13 +103,12 @@ export function TopNav() {
             .slice(0, 10)
           return [...unread, ...read]
         })
-        
+
         // Send PATCH request
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/user/notification/${id}/mark-as-read`, {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
-            // ...(token ? { "Authorization": `Bearer ${token}` } : {}),
           },
           body: JSON.stringify({ isRead: true }),
         })
@@ -136,7 +143,7 @@ export function TopNav() {
         await fetchNotifications() // Sync with server on failure
       }
     },
-    [notifications, token]
+    [notifications]
   )
 
   // Fetch on mount and poll every minute
@@ -147,18 +154,17 @@ export function TopNav() {
   }, [fetchNotifications])
 
   const unreadCount = notifications.filter((n) => !n.isRead).length
+  console.log("Notifications passed to dropdown:", notifications) // Debug: Check what’s passed
 
   return (
     <div className="fixed left-0 right-0 top-0 h-16 bg-background border-b z-50">
       <div className="flex items-center justify-between px-4 h-full mx-auto">
         <Link href="/" className="flex items-center">
-          {/* <img src="/icon-logo.png" alt="IIUC Logo" className="h-8 w-8 rounded-xl" /> */}
-          <span className="ml-3 text-xl font-bold ">
+          <span className="ml-3 text-xl font-bold">
             <span className="bg-clip-text text-transparent bg-gradient-to-r from-[var(--gradient-from)] to-[var(--gradient-to)]">IIUC </span>BUS
           </span>
         </Link>
         <div className="flex items-center space-x-6">
-         
           <Popover open={isNotificationOpen} onOpenChange={setIsNotificationOpen}>
             <PopoverTrigger asChild>
               <Button variant="ghost" size="icon" className="relative">

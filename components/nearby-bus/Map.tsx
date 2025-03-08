@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
@@ -14,7 +15,7 @@ interface Bus {
   distance: string;
 }
 
-interface LatLng {
+interface LatLng { 
   lat: number;
   lng: number;
 }
