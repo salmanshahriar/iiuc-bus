@@ -74,7 +74,7 @@ export default function SupportPage() {
           <CardContent className="p-4 sm:p-6">
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4">
               <div>
-                <h2 className="text-xl sm:text-2xl font-semibold text-[var(--primary-color)] flex items-center gap-2">
+                <h2 className="text-xl font-semibold text-[var(--primary-color)] flex items-center gap-2">
                   <Phone className="h-5 w-5 sm:h-6 sm:w-6" />
                   Emergency Contacts
                 </h2>
@@ -89,7 +89,7 @@ export default function SupportPage() {
                 { title: "Field Supervisor", name: "Mohammed Jashim", phone: "01830161026" },
                 { title: "Assistant Field Supervisor", name: "Kazi Habibur Rahman", phone: "01989110396" },
                 { title: "Assistant Field Supervisor", name: "Mohammed Muzammel Hossain", phone: "01843689030" },
-                { title: "Director", name: "Md Belal Uddin", phone: "01816-452588" },
+                { title: "Director", name: "Mohd. Mohiuddin Hossain", phone: "01819819943" },
                 { title: "Assistant Director (Female)", name: "", phone: "01773229341" },
               ].map((contact, index) => (
                 <div key={index} className="bg-muted p-2 rounded-md">
@@ -111,7 +111,7 @@ export default function SupportPage() {
           <CardContent className="p-4 sm:p-6">
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
               <div>
-                <h2 className="text-xl sm:text-2xl font-semibold text-[var(--primary-color)] flex items-center gap-2 mb-2 sm:mb-0">
+                <h2 className="text-xl font-semibold text-[var(--primary-color)] mb-2 flex items-center gap-2">
                   <MessageCircle className="h-5 w-5 sm:h-6 sm:w-6" />
                   Feedback
                 </h2>
@@ -269,11 +269,11 @@ export default function SupportPage() {
 
         <Card>
           <CardContent className="p-6">
-            <h2 className="text-xl font-semibold text-[var(--primary-color)] mb-4 flex items-center gap-2">
+            <h2 className="text-xl font-semibold text-[var(--primary-color)] mb-6 flex items-center gap-2">
               <Code className="h-5 w-5" />
               Developer Info
             </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
               {[
                 { name: "Md. Saiful Chowdhury", role: "Project Lead/ Backend" },
                 { name: "Salman Shahriar", role: "User Panel Frontend Lead" },
@@ -289,11 +289,31 @@ export default function SupportPage() {
                   <p className="text-xs text-muted-foreground">{dev.role}</p>
                 </div>
               ))}
+              <div className="mt-6 text-center">
+                <h3 className="text-sm font-medium text-[var(--primary-color)] mb-2">Supported By:</h3>
+                <p className="text-xs text-muted-foreground">Mohammed Hasan,<br />Minhaz Uddin</p>
+              </div>
             </div>
-            <div className="mt-6 text-center">
-              <h3 className="text-sm font-medium text-[var(--primary-color)] mb-2">Supported By:</h3>
-              <p className="text-xs text-muted-foreground">Mohammed Hasan, Minhaz Uddin</p>
+            <div className="mt-10 text-center">
+              <h3 className="text-sm font-medium text-[var(--primary-color)] mb-2">Big Thanks To:</h3>
+              <p className="text-xs text-muted-foreground">Mohd. Mohiuddin Hossain, Director TDM,<br />& <br />Jalal Uddin, IT Division</p>
             </div>
+          </CardContent>
+        </Card>
+
+        {/* New User Guideline Section */}
+        <Card>
+          <CardContent className="p-6">
+            <h2 className="text-xl font-semibold text-[var(--primary-color)] mb-6 flex items-center gap-2">
+              <User className="h-5 w-5" />
+              User Guideline
+            </h2>
+            <ul className="list-decimal pl-5 space-y-2 text-sm">
+              <li>Keeping Id Card Visible</li>
+              <li>Standing on particular spot</li>
+              <li>Arriving In Time</li>
+              <li>Maintaining Friendly attitude with driver and helper</li>
+            </ul>
           </CardContent>
         </Card>
       </div>

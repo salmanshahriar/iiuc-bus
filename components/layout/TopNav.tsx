@@ -47,7 +47,7 @@ export function TopNav() {
 
     try {
       setLoading(true)
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/user/notification`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/admin/notification`, {
         headers: {
           "Content-Type": "application/json",
           // ...(token ? { "Authorization": `Bearer ${token}` } : {}),

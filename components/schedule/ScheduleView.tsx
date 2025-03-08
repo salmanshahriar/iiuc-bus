@@ -298,7 +298,7 @@ export default function ScheduleView({ schedules }: ScheduleViewProps) {
   )
 
   const MobileView = () => (
-    <div className="grid grid-rows-[auto_1fr] min-h-[calc(100vh-2rem)] px-4">
+    <div className="grid grid-rows-[auto_1fr] min-h-[calc(100vh-2rem)]">
       <div>
         <FilterSection />
       </div>
